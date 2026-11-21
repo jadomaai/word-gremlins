@@ -13,6 +13,8 @@ flashcards. They count as tamed and join the daily check-ups.
 -cious/-tious) and homophones (there/their/they're, your/you're, of/off, to/too/two,
 its/it's). Score 7/8 on 3 different days to tame a rule; tamed rules get check-ups.
 
+**Sentences** (✨ tab): Sentence Glow-Up, built in. Each sentence offers 3 gremlin challenges (shown by meaning and sound, never spelling). Gremlin words spelled right earn bonus stars, and a tamed word used correctly counts as a check-up. -ed and -cious/-tious words are checked against the Lab rules.
+
 Plain HTML/CSS/JS. No build step, no dependencies. Works offline once installed.
 
 ## Put it on GitHub Pages
@@ -32,5 +34,5 @@ Plain HTML/CSS/JS. No build step, no dependencies. Works offline once installed.
 
 - Progress is stored on each device (localStorage). To move it: Settings → *Copy backup*, then paste on the other device and tap *Restore*.
 - Use your own words: Settings → *Your own word list*. Optional `[brackets]` mark tricky letters, `|text` adds a hint.
-- Updating: change the files, and bump `CACHE` in `sw.js` (currently `wordgremlins-v2`) so installed copies refresh.
+- Updating: change the files, and bump `CACHE` in `sw.js` (currently `wordgremlins-v3`) so installed copies refresh.
 - Tip: switch off predictive text/autocorrect on the keyboard for best results (the app asks the browser not to offer suggestions, but some keyboards ignore that).

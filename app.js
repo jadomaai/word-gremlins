@@ -42,6 +42,7 @@ function buildList() {
     w.emoji = EMOJI[i % EMOJI.length]; BY[w.word] = w;
     if (!S.words[w.word]) S.words[w.word] = { stage: 0, days: [], mastered: false, lastCredit: '', lastSeen: '', lastStageDay: '', misses: 0 };
   });
+  try { localStorage.setItem('wordgremlins.catalog', JSON.stringify(LIST.map((w, i) => ({ w: w.word, e: w.emoji, h: w.hint, i })))); } catch (e) { }
   S.unlocked = Math.min(LIST.length, Math.max(S.unlocked, Math.min(S.settings.batch, LIST.length)));
   S.batchStart = Math.min(S.batchStart, S.unlocked);
 }
@@ -51,6 +52,8 @@ const active = () => LIST.filter((w, i) => !P(w).mastered && (i < S.unlocked || 
 const masteredCount = () => LIST.filter(w => P(w).mastered).length;
 function updateBoss() { if (!S.champion && S.unlocked > 0 && active().length === 0) S.bossReady = true; }
 const wordMarked = w => [...w.word].map((c, i) => w.marks[i] ? `<span class="hl">${esc(c)}</span>` : esc(c)).join('');
+function measureTabs() { const t = document.querySelector('.tabs'); if (t) document.documentElement.style.setProperty('--tabh', t.offsetHeight + 'px'); }
+window.addEventListener('resize', measureTabs);
 const pips = w => '●'.repeat(Math.min(3, P(w).days.length)) + '○'.repeat(3 - Math.min(3, P(w).days.length));
 
 /* ---------- speech & sound ---------- */
@@ -81,10 +84,23 @@ function confetti(list) {
 
 /* ---------- shell ---------- */
 function shell(inner, tab) {
-  app.innerHTML = `<main>${inner}</main><nav class="tabs">${[['home', '🎮 Play'], ['lab', '🧪 Lab'], ['shelf', '🏆 Shelf'], ['settings', '⚙️ Settings']].map(([k, l]) => `<button data-go="${k}" class="${k === tab ? 'on' : ''}"><span class="ti">${l.split(' ')[0]}</span>${l.split(' ').slice(1).join(' ')}</button>`).join('')}</nav>`;
-  app.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { view = b.dataset.go; render(); });
+  app.innerHTML = `<main>${inner}</main><nav class="tabs">${TABS.map(([k, l]) => `<button data-go="${k}" class="${k === tab ? 'on' : ''}"><span class="ti">${l.split(' ')[0]}</span>${l.split(' ').slice(1).join(' ')}</button>`).join('')}</nav>`;
+  app.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
+  showGlow(tab === 'glow'); measureTabs();
 }
-function render() { ({ home, shelf, settings, lab: labView })[view](); window.scrollTo(0, 0); }
+const TABS = [['home', '🎮 Play'], ['lab', '🧪 Lab'], ['glow', '✨ Sentences'], ['shelf', '🏆 Shelf'], ['settings', '⚙️ Settings']];
+let glowFrame = null;
+function go(v) {
+  if (view === 'glow' && v !== 'glow') { load(); buildList(); updateBoss(); } // pick up stars and check-ups earned in Sentences
+  if (v !== 'glow') save();
+  view = v; render();
+}
+function showGlow(on) {
+  if (on && !glowFrame) { glowFrame = document.createElement('iframe'); glowFrame.className = 'glowframe'; glowFrame.title = 'Sentence Glow-Up'; glowFrame.src = 'glowup.html'; document.body.appendChild(glowFrame); }
+  if (glowFrame) glowFrame.style.display = on ? 'block' : 'none';
+}
+function glowView() { shell('', 'glow'); }
+function render() { ({ home, shelf, settings, lab: labView, glow: glowView })[view](); window.scrollTo(0, 0); }
 const app = document.getElementById('app');
 
 /* ---------- home ---------- */
@@ -114,7 +130,7 @@ function home() {
    ${(() => { const due = rulesDue(); return due.length ? `<button class="btn" data-go="lab">👻 Spelling Lab: ${due.length} rule check-up${due.length > 1 ? 's' : ''} due</button>` : `<button class="btn" data-go="lab">🧪 Spelling Lab: word endings &amp; homophones</button>`; })()}
    <details class="card"><summary>How it works</summary>
     <p>Each gremlin is a word. Train it through four rounds: <b>peek &amp; build</b>, <b>ghost letters</b>, <b>spot the saboteur</b>, and <b>listen &amp; write</b>.</p>
-    <p>Spell it right from memory on <b>3 different days</b> and it's tamed. Tame the whole batch, beat the boss, and the next batch unlocks. Tamed gremlins sometimes ambush you later to check you still know them!</p><p>Words learned with <b>flashcards</b> can be added in Settings. They count as tamed and join the check-ups.</p></details>`, 'home');
+    <p>Spell it right from memory on <b>3 different days</b> and it's tamed. Tame the whole batch, beat the boss, and the next batch unlocks. Tamed gremlins sometimes ambush you later to check you still know them!</p><p>In <b>✨ Sentences</b>, use gremlin words in your own sentences, spelled from memory, for bonus stars. A tamed word spelled right there counts as a check-up.</p><p>Words learned with <b>flashcards</b> can be added in Settings. They count as tamed and join the check-ups.</p></details>`, 'home');
   app.querySelectorAll('[data-a]').forEach(b => b.onclick = () => ({ daily: () => startSession('daily'), checkup: () => startSession('checkup'), practice: () => startSession('practice'), boss: startBoss })[b.dataset.a]());
 }
 
@@ -151,8 +167,8 @@ function settings() {
     <textarea id="custom" placeholder="necessary&#10;rhythm&#10;..." spellcheck="false">${esc(s.custom)}</textarea>
     <button class="btn small primary" id="saveList">Use this list</button> <button class="btn small" id="builtin">Use the built-in list (${BUILTIN.length} words)</button></div>
    <h3>Progress</h3>
-   <div class="card"><p class="sub">Progress is saved on this device only. To move it to another device, copy the backup code and paste it there.</p>
-    <textarea id="backup" spellcheck="false">${esc(JSON.stringify(S))}</textarea>
+   <div class="card"><p class="sub">Progress is saved on this device only. To move it to another device, copy the backup code and paste it there. The code includes Sentences progress and finished sentences too.</p>
+    <textarea id="backup" spellcheck="false">${esc(backupText())}</textarea>
     <button class="btn small" id="copyB">Copy backup</button> <button class="btn small" id="restoreB">Restore from the box above</button>
     <button class="btn small ghost" id="reset">Reset all progress…</button></div>
    <p class="mute center">Word Gremlins · works offline once installed</p>`, 'settings');
@@ -169,7 +185,7 @@ function settings() {
   $('#saveList').onclick = () => { s.custom = $('#custom').value; resetBatches(); save(); view = 'home'; render(); };
   $('#builtin').onclick = () => { s.custom = ''; resetBatches(); save(); view = 'home'; render(); };
   $('#copyB').onclick = () => { $('#backup').select(); try { navigator.clipboard.writeText($('#backup').value); } catch (e) { document.execCommand('copy'); } };
-  $('#restoreB').onclick = () => { try { const o = JSON.parse($('#backup').value); if (!o || !o.words || !o.settings) throw 0; S = Object.assign(defaults(), o); buildList(); updateBoss(); save(); view = 'home'; render(); } catch (e) { $('#restoreB').textContent = 'That backup code did not look right'; setTimeout(() => { const b = $('#restoreB'); if (b) b.textContent = 'Restore from the box above'; }, 2500); } };
+  $('#restoreB').onclick = () => { try { const o = JSON.parse($('#backup').value); if (!o || !o.words || !o.settings) throw 0; if (o._glow) { try { localStorage.setItem(GLOWKEY, JSON.stringify(o._glow)); } catch (e) { } if (glowFrame) { glowFrame.remove(); glowFrame = null; } } delete o._glow; S = Object.assign(defaults(), o); buildList(); updateBoss(); save(); view = 'home'; render(); } catch (e) { $('#restoreB').textContent = 'That backup code did not look right'; setTimeout(() => { const b = $('#restoreB'); if (b) b.textContent = 'Restore from the box above'; }, 2500); } };
   $('#reset').onclick = () => { const r = $('#reset'); if (!r.dataset.sure) { r.dataset.sure = '1'; r.textContent = 'Tap again to erase all progress'; r.style.color = 'var(--bad)'; setTimeout(() => { if (r.isConnected) { delete r.dataset.sure; r.textContent = 'Reset all progress…'; r.style.color = ''; } }, 4000); return; } { const keep = S.settings; S = defaults(); S.settings = keep; buildList(); save(); view = 'home'; render(); } };
 }
 function flashList() {
@@ -216,6 +232,8 @@ function showFlash(r) {
   $('#flashMsg').textContent = parts.length ? '✔ ' + parts.join(' · ') : 'No words found.';
   $('#flashMsg').scrollIntoView({ block: 'center' });
 }
+const GLOWKEY = 'sentence-glow-up-v1';
+function backupText() { let g = null; try { g = JSON.parse(localStorage.getItem(GLOWKEY) || 'null'); } catch (e) { } return JSON.stringify(g ? Object.assign({}, S, { _glow: g }) : S); }
 function resetBatches() { S.unlocked = S.settings.batch; S.batchStart = 0; S.bossReady = false; S.champion = false; buildList(); updateBoss(); }
 
 /* ---------- question scaffolding ---------- */

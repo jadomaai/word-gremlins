@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sentence Glow-Up</title>
+<meta name="theme-color" content="#6c3fd1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F0FF;--panel:#FFFFFF;--ink:#271F45;--muted:#62598A;--line:#DCD3F5;
+  --accent:#5B3FE0;--accent-ink:#FFFFFF;--good:#17845A;--warn:#B4400C;
+  --r1:#D93B4A;--r2:#C77700;--r3:#178C5A;--r4:#1F6FC0;--r5:#8A3DBE;
+  --display:"Baloo 2","Trebuchet MS","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Verdana","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16112A;--panel:#221B3D;--ink:#F0ECFF;--muted:#ADA5D2;--line:#3A3162;
+    --accent:#A28EFF;--accent-ink:#16112A;--good:#4FD69A;--warn:#FF9B6B;
+    --r1:#FF7A85;--r2:#FFBA4A;--r3:#4FD69A;--r4:#6EB6FF;--r5:#CF92F5;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16112A;--panel:#221B3D;--ink:#F0ECFF;--muted:#ADA5D2;--line:#3A3162;
+  --accent:#A28EFF;--accent-ink:#16112A;--good:#4FD69A;--warn:#FF9B6B;
+  --r1:#FF7A85;--r2:#FFBA4A;--r3:#4FD69A;--r4:#6EB6FF;--r5:#CF92F5;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.55}
+.wrap{max-width:46rem;margin:0 auto;padding:1.25rem 1rem 3rem}
+h1,h2,h3{font-family:var(--display);line-height:1.15;margin:0}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* top bar */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:800;font-size:1.6rem;letter-spacing:-.01em}
+.logo span{display:inline-block}
+.logo .c1{color:var(--r1)}.logo .c2{color:var(--r2)}.logo .c3{color:var(--r3)}.logo .c4{color:var(--r4)}.logo .c5{color:var(--r5)}
+.stats{display:flex;gap:.6rem;flex-wrap:wrap}
+.pill{background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:.2rem .8rem;font-weight:700;font-size:.95rem;white-space:nowrap}
+
+.panel{background:var(--panel);border:2px solid var(--line);border-radius:1.25rem;padding:1.25rem;margin-bottom:1.25rem}
+.muted{color:var(--muted)}
+.btn{border:none;border-radius:.9rem;padding:.7rem 1.2rem;font-weight:700;background:var(--accent);color:var(--accent-ink);font-size:1rem;box-shadow:0 3px 0 color-mix(in srgb,var(--accent) 55%,#000)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 color-mix(in srgb,var(--accent) 55%,#000)}
+.btn.ghost{background:var(--panel);color:var(--ink);border:2px solid var(--line);box-shadow:0 2px 0 var(--line)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn.small{padding:.4rem .8rem;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.seg{display:flex;background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:.25rem;gap:.25rem;margin-bottom:1rem}
+.segb{flex:1;border:none;background:transparent;border-radius:999px;padding:.55rem .8rem;font-weight:700;color:var(--muted)}
+.segb[aria-checked="true"]{background:var(--accent);color:var(--accent-ink)}
+.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+
+/* home */
+.hello{font-size:clamp(1.8rem,5vw,2.4rem);font-weight:800;margin-bottom:.25rem}
+.level{margin-top:1rem}
+.track{height:.9rem;background:color-mix(in srgb,var(--accent) 15%,transparent);border-radius:999px;overflow:hidden;margin:.4rem 0 .3rem}
+.fill{height:100%;background:linear-gradient(90deg,var(--r1),var(--r2),var(--r3),var(--r4),var(--r5));border-radius:999px;transition:width .6s}
+.picks{display:grid;gap:.6rem;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));margin-top:.8rem}
+.pick{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:1rem;padding:.8rem 1rem;font-weight:700;display:flex;justify-content:space-between;gap:.5rem;align-items:center}
+.pick:hover{border-color:var(--accent)}
+.pick .done{color:var(--good);font-size:.9rem;white-space:nowrap}
+.field{width:100%;padding:.7rem .9rem;border:2px solid var(--line);border-radius:.9rem;background:var(--bg)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.6rem;margin-top:.8rem}
+.badge{border:2px dashed var(--line);border-radius:1rem;padding:.6rem .7rem;font-size:.9rem;opacity:.55}
+.badge b{display:block;font-family:var(--display);font-size:1.05rem}
+.badge.on{border-style:solid;border-color:var(--accent);opacity:1;background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.badge .ico{font-size:1.4rem}
+
+/* play */
+.rounds{display:flex;gap:.4rem;margin-bottom:1rem}
+.rd{flex:1;text-align:center;border-radius:.8rem;padding:.35rem .2rem;font-weight:700;font-size:.85rem;border:2px solid var(--line);color:var(--muted)}
+.rd.now{color:#fff;border-color:transparent}
+.rd.past{border-color:transparent}
+.rd b{display:block;font-family:var(--display);font-size:1.15rem}
+.stage{font-family:var(--display);font-weight:600;font-size:clamp(1.35rem,4vw,1.9rem);line-height:1.5;margin:.3rem 0 0}
+mark{color:inherit;border-radius:.3em;padding:0 .12em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+mark.r1{background:color-mix(in srgb,var(--r1) 24%,transparent);box-shadow:inset 0 -3px 0 var(--r1)}
+mark.r2{background:color-mix(in srgb,var(--r2) 24%,transparent);box-shadow:inset 0 -3px 0 var(--r2)}
+mark.r3{background:color-mix(in srgb,var(--r3) 24%,transparent);box-shadow:inset 0 -3px 0 var(--r3)}
+mark.r4{background:color-mix(in srgb,var(--r4) 24%,transparent);box-shadow:inset 0 -3px 0 var(--r4)}
+mark.r5{background:color-mix(in srgb,var(--r5) 24%,transparent);box-shadow:inset 0 -3px 0 var(--r5)}
+.task h2{font-size:1.5rem}
+.task .eg{font-style:italic;color:var(--muted);margin:.3rem 0 0}
+details{margin-top:.6rem}
+summary{cursor:pointer;font-weight:700;color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
+.chip{border:2px solid var(--line);border-radius:999px;padding:.1rem .65rem;font-size:.95rem}
+.power{display:flex;gap:.8rem;align-items:center;border:2px solid var(--r2);background:color-mix(in srgb,var(--r2) 10%,transparent);border-radius:1rem;padding:.7rem .9rem;margin-top:1rem}
+.power .ico{font-size:1.6rem}
+.power b{font-family:var(--display);font-size:1.05rem}
+textarea{width:100%;min-height:7rem;resize:vertical;padding:.9rem 1rem;border:3px solid var(--line);border-radius:1rem;background:var(--bg);font-size:1.2rem;line-height:1.5}
+textarea:focus{border-color:var(--accent);outline:none}
+.typebar{display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin:.5rem 0 .8rem;font-size:.95rem}
+.fb{border-radius:1rem;padding:1rem 1.1rem;margin-top:1rem;border:2px solid}
+.fb.ok{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,transparent)}
+.fb.no{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent)}
+.fb h3{font-size:1.35rem}
+.fb ul{margin:.4rem 0 .8rem;padding-left:1.2rem}
+
+/* finish */
+.ladder{list-style:none;padding:0;margin:.6rem 0 0}
+.ladder li{padding:.55rem 0;border-bottom:1px dashed var(--line);font-size:1.05rem}
+.ladder li:last-child{border-bottom:none;font-family:var(--display);font-size:1.35rem;font-weight:600}
+.ladder .lbl{display:block;font-size:.8rem;font-weight:700;color:var(--muted);font-family:var(--body)}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem .9rem;font-size:.9rem;margin-top:.6rem}
+.big{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,2.8rem);line-height:1.1}
+
+.toast{position:fixed;left:50%;bottom:calc(1rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.7rem 1.1rem;border-radius:1rem;font-weight:700;max-width:calc(100% - 2rem);z-index:20;text-align:center}
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:15}
+footer{text-align:center;font-size:.85rem;margin-top:2rem}
+footer button{background:none;border:none;color:var(--muted);text-decoration:underline}
+/* signpost guide table */
+.tblwrap{overflow-x:auto}
+.sg{width:100%;border-collapse:collapse;font-size:.95rem}
+.sg th,.sg td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+.sg th{font-family:var(--display);font-size:1rem;color:var(--r4)}
+.sg td:first-child{font-weight:700;white-space:nowrap}
+.sg tbody tr:nth-child(odd){background:color-mix(in srgb,var(--r4) 6%,transparent)}
+/* signpost check */
+.fb.sp{border-color:var(--r4);background:color-mix(in srgb,var(--r4) 9%,transparent)}
+.sp-wrong{color:var(--warn);font-weight:700;margin:.3rem 0 0}
+/* finished list */
+.hitem{border-top:1px dashed var(--line);padding:.6rem 0}
+.hitem:first-child{border-top:none}
+.hitem summary{color:var(--ink);font-weight:400}
+.hitem summary .hd{display:block;font-size:.8rem;font-weight:700;color:var(--muted)}
+.hitem summary .hf{font-family:var(--display);font-weight:600;font-size:1.1rem}
+.hitem .ladder li:last-child{font-size:1.15rem}
+/* modes + word builder */
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:.6rem;margin-top:.7rem}
+.mode{text-align:left;border:2px solid var(--line);background:var(--bg);border-radius:1rem;padding:.8rem 1rem;font-size:1.4rem}
+.mode b{font-family:var(--display);font-size:1.15rem;display:block}
+.mode span{display:block;font-size:.92rem;color:var(--muted);line-height:1.4}
+.mode[aria-checked="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.board{display:flex;flex-wrap:wrap;gap:.45rem;padding:.9rem;min-height:5rem;border:3px dashed var(--line);border-radius:1rem;background:var(--bg);margin:.6rem 0;align-items:center}
+.tile{touch-action:none;user-select:none;-webkit-user-select:none;font-family:var(--display);font-weight:600;font-size:1.25rem;line-height:1.3;padding:.25rem .7rem;border-radius:.7rem;border:2px solid var(--line);background:var(--panel);box-shadow:0 2px 0 var(--line);cursor:grab}
+.tile.p{padding:.25rem .55rem;min-width:2rem}
+.tile.new{border-color:var(--rc);background:color-mix(in srgb,var(--rc) 16%,var(--panel))}
+.tile.sel{outline:3px solid var(--accent);outline-offset:2px}
+.tile.lifting{opacity:.3}
+.tile.ins{box-shadow:-7px 0 0 -3px var(--accent)}
+.tile.ins-after{box-shadow:7px 0 0 -3px var(--accent)}
+.drag-ghost{position:fixed;pointer-events:none;z-index:30;transform:translate(-50%,-50%) rotate(-3deg);margin:0}
+#wordText{margin:.6rem 0}
+.chip.add{cursor:pointer;background:var(--panel)}
+.chip.add:hover{border-color:var(--accent)}
+.locked .adder,.locked #tileTools,.locked #asTextBtn,.locked #boardHelp,.locked .addNote{display:none!important}
+.locked .board,.locked #wordText{pointer-events:none}
+#lockNote{display:none;font-weight:700;margin:.5rem 0 0}
+.locked #lockNote{display:block}
+/* gremlin challenges */
+.gbox{border:2px solid var(--r3);background:color-mix(in srgb,var(--r3) 8%,transparent);border-radius:1rem;padding:.7rem .9rem;margin-top:1rem}
+.gbox h3{font-size:1.15rem}
+.gcard{display:flex;align-items:center;gap:.7rem;background:var(--panel);border:2px solid var(--line);border-radius:.9rem;padding:.45rem .7rem;margin-top:.5rem}
+.gcard .ge{font-size:1.7rem}.gcard .gt{flex:1;line-height:1.35}.gcard.gdone{border-color:var(--good)}.gcard.gdone .gt{color:var(--good)}
+.gtry{color:var(--warn);font-weight:700;font-size:.9rem}
+.gnotes{border-top:1px dashed var(--line);padding-top:.5rem;margin:.2rem 0 .8rem}.gnotes p{margin:.3rem 0}
+.gbad{color:var(--warn);font-weight:700;text-decoration:line-through}
+@media (max-width:30rem){.rounds{gap:.25rem}.rd{min-width:0;font-size:.7rem;padding:.3rem .1rem;overflow-wrap:anywhere}.rd b{font-size:1rem}}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="wrap">
+  <div class="bar">
+    <div class="logo" aria-label="Sentence Glow-Up"><span class="c1">Sen</span><span class="c2">ten</span><span class="c3">ce</span> <span class="c4">Glow</span><span class="c5">-Up</span></div>
+    <div class="stats">
+      <span class="pill" id="starPill">⭐ 0</span>
+      <span class="pill" id="wpmPill">⌨️ best 0 wpm</span>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <section id="home">
+    <div class="panel" id="settings" hidden>
+      <h2>Player settings</h2>
+      <label for="renameIn" style="font-weight:700;display:block;margin-top:.8rem">Switch or add a player</label>
+      <p class="muted" style="margin:.1rem 0 0;font-size:.95rem">Each player keeps their own stars and badges. Type a new name for a fresh start, or pick someone below.</p>
+      <div class="row" style="margin-top:.4rem">
+        <input class="field" id="renameIn" maxlength="20" autocomplete="off" style="flex:1;min-width:10rem">
+        <button class="btn small" id="renameBtn">Switch player</button>
+      </div>
+      <div class="chips" id="playerList" style="margin-top:.6rem"></div>
+      <div hidden>
+      </div>
+      <p style="margin:1.3rem 0 .2rem;font-weight:700">Start fresh</p>
+      <p class="muted" id="resetInfo" style="margin:0 0 .6rem"></p>
+      <div class="row" id="resetAsk"><button class="btn ghost small" id="resetStart">Reset stars and badges</button></div>
+      <div class="row" id="resetConfirm" hidden><strong>Are you sure? This can't be undone.</strong><button class="btn small" id="resetYes">Yes, reset everything</button><button class="btn ghost small" id="resetNo">Cancel</button></div>
+      <p style="margin:1.3rem 0 .2rem;font-weight:700">Delete a player</p>
+      <p class="muted" style="margin:0 0 .6rem;font-size:.95rem">Removes the player and all their stars and badges.</p>
+      <div class="chips" id="delList"></div>
+      <div class="row" id="delConfirm" hidden style="margin-top:.6rem"><strong id="delAsk"></strong><button class="btn small" id="delYes">Yes, delete</button><button class="btn ghost small" id="delNo">Cancel</button></div>
+      <div class="row" style="margin-top:1.2rem"><button class="btn ghost small" id="settingsClose">Close</button></div>
+    </div>
+    <div class="panel" id="nameBox" hidden>
+      <h2>Hello! What's your name?</h2>
+      <div class="row" style="margin-top:.7rem">
+        <input class="field" id="nameIn" maxlength="20" autocomplete="off" style="flex:1;min-width:10rem" aria-label="Your name">
+        <button class="btn" id="nameSave">Let's go</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;align-items:flex-start"><div class="hello" id="hello" style="flex:1;min-width:12rem">Ready to glow up some sentences?</div><button class="btn ghost small" id="openSettings">👤 Change player</button></div>
+      <p class="muted" style="margin:.2rem 0 0">Pick a sentence and make it better in 5 rounds. Every round earns stars.</p>
+      <div class="level">
+        <div class="row" style="justify-content:space-between"><strong id="lvlName">Word Apprentice</strong><span class="muted" id="lvlNext"></span></div>
+        <div class="track"><div class="fill" id="lvlFill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>How do you want to play?</h2>
+      <div class="modes" id="modes" role="radiogroup" aria-label="Play style">
+        <button class="mode" data-mode="type" role="radio" aria-checked="true">⌨️<b>Typing practice</b><span>Type the whole sentence every round. Earns typing badges.</span></button>
+        <button class="mode" data-mode="words" role="radio" aria-checked="false">🧩<b>Word builder</b><span>Drag words around, add new ones or paste. Great for trying different word orders.</span></button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 id="pickHead">Choose a sentence</h2>
+      <p style="margin:.4rem 0 0" id="gremHomeTip" hidden>🎯 Every sentence comes with <b>gremlin challenges</b>: words from Word Gremlins to spell from memory for bonus stars.</p>
+      <p class="muted" style="margin:.2rem 0 0;font-size:.95rem">When you finish one, it moves to your finished list and a new sentence joins the bottom.</p>
+      <div class="picks" id="picks"></div>
+      <p style="margin:1.1rem 0 .4rem;font-weight:700">Or type your own</p>
+      <div class="row">
+        <input class="field" id="ownIn" placeholder="e.g. The boat sailed away." style="flex:1;min-width:12rem" aria-label="Your own sentence">
+        <button class="btn" id="ownGo">Upgrade it</button>
+      </div>
+      <p class="muted" id="ownErr" style="margin:.4rem 0 0" hidden>Type a sentence of at least 3 words.</p>
+    </div>
+    <div class="panel" id="histPanel">
+      <div class="row" style="justify-content:space-between"><h2 id="histHead">My finished sentences</h2><button class="btn ghost small" id="copyAll">📋 Copy all</button></div>
+      <p class="muted" id="histEmpty" style="margin:.4rem 0 0">Finished sentences are saved here with every round, so you can copy them into another app.</p>
+      <div id="hist"></div>
+      <textarea id="copyBox" hidden readonly aria-label="Text to copy" style="min-height:9rem;font-size:1rem;margin-top:.8rem"></textarea>
+      <p class="muted" id="copyBoxHelp" hidden style="margin:.3rem 0 0;font-size:.9rem">The text above is selected. Press Ctrl+C (Cmd+C on a Mac), or long-press it and choose Copy.</p>
+      <div class="row" id="histClearRow" style="margin-top:.9rem"><button class="btn ghost small" id="histClear">Clear this list</button></div>
+      <div class="row" id="histConfirm" hidden style="margin-top:.9rem"><strong>Delete every finished sentence?</strong><button class="btn small" id="histYes">Yes, delete</button><button class="btn ghost small" id="histNo">Cancel</button></div>
+    </div>
+    <div class="panel">
+      <h2 id="badgeHead">Badges</h2>
+      <div class="badges" id="badges"></div>
+    </div>
+  </section>
+
+  <!-- PLAY -->
+  <section id="play" hidden>
+    <div class="rounds" id="rounds"></div>
+    <div class="panel">
+      <div class="muted" style="font-size:.9rem;font-weight:700" id="stageLbl">Your sentence so far</div>
+      <p class="stage" id="stage"></p>
+    </div>
+    <div class="panel task">
+      <h2 id="taskTitle"></h2>
+      <p style="margin:.4rem 0 0" id="taskTip"></p>
+      <p class="eg" id="taskEg"></p>
+      <div id="signGuide" hidden>
+        <p style="margin:.9rem 0 .4rem;font-weight:700">🪧 Signpost guide: what each conjunction tells the reader</p>
+        <div class="tblwrap"><table class="sg">
+          <thead><tr><th>Conjunction</th><th>Its job</th><th>It tells the reader…</th></tr></thead>
+          <tbody>
+            <tr><td>because, as, since</td><td>A reason</td><td>“Here comes the reason.”</td></tr>
+            <tr><td>although, even though, but, yet</td><td>A surprise or opposite</td><td>“Here comes something you wouldn’t expect.”</td></tr>
+            <tr><td>while, whilst, as, when</td><td>Same time</td><td>“This is happening at the same moment.”</td></tr>
+            <tr><td>so</td><td>A result</td><td>“Here comes what happened because of it.”</td></tr>
+            <tr><td>until, before, after, once</td><td>Time order</td><td>“Here’s when it happened.”</td></tr>
+            <tr><td>if, unless</td><td>Only if…</td><td>“This only happens if something else does.”</td></tr>
+            <tr><td>and</td><td>Adding an idea</td><td>“Here’s another idea that goes with it.”</td></tr>
+          </tbody>
+        </table></div>
+        <p class="muted" style="margin:.4rem 0 0;font-size:.92rem">Test it: read the first part, then ask “Does the next part really do what my signpost promised?”</p>
+      </div>
+      <details id="bankBox"><summary>Need ideas? Open the word bank</summary><div class="chips" id="bank"></div></details>
+      <div class="power" id="power"><span class="ico">⚡</span><div><b>Power-up: <span id="powerText"></span></b><div class="muted" style="font-size:.9rem">Do it for 5 bonus stars.</div></div></div>
+      <div class="gbox" id="gremBox" hidden><div class="row" style="justify-content:space-between"><h3>🎯 Gremlin challenges</h3><button type="button" class="btn ghost small" id="gremNew">🔄 Other words</button></div>
+        <p class="muted" style="margin:.3rem 0 0;font-size:.92rem">Use one of these gremlin words in any round, spelled from memory, for 5 bonus stars. Tap 🔊 to hear it. Use a different gremlin word all by yourself for 8!</p>
+        <div id="gremCards"></div></div>
+    </div>
+    <div class="panel">
+      <div class="seg" id="modeSwitch" role="radiogroup" aria-label="Play style"><button type="button" class="segb" data-mode="type" role="radio">⌨️ Typing</button><button type="button" class="segb" data-mode="words" role="radio">🧩 Word builder</button></div>
+      <div id="typeArea">
+        <label for="typer" style="font-weight:700">Type your upgraded sentence</label>
+        <div class="typebar muted"><span id="liveWpm">⌨️ Start typing…</span><span id="count">0 words</span></div>
+        <textarea id="typer" spellcheck="true" autocomplete="off" placeholder="Type the whole sentence again with your upgrade…"></textarea>
+      </div>
+      <div id="wordArea" hidden>
+        <div class="row" style="justify-content:space-between"><strong>Build your upgraded sentence</strong><button class="btn ghost small" id="asTextBtn">✏️ Edit as text</button></div>
+        <p class="muted" id="boardHelp" style="margin:.3rem 0 0;font-size:.95rem">Drag words to move them. Tap a word to move, change or remove it.</p>
+        <div class="board" id="board" aria-label="Word tiles"></div>
+        <textarea id="wordText" hidden spellcheck="true" autocomplete="off" aria-label="Your sentence as text"></textarea>
+        <div class="row" id="tileTools" hidden style="margin-bottom:.7rem">
+          <span class="muted">Selected: <b id="selWord"></b></span>
+          <button class="btn ghost small" id="tLeft" aria-label="Move word left">←</button>
+          <button class="btn ghost small" id="tRight" aria-label="Move word right">→</button>
+          <button class="btn ghost small" id="tCase" aria-label="Switch capital letter">Aa</button>
+          <button class="btn ghost small" id="tDel">🗑 Remove</button>
+          <button class="btn ghost small" id="tDone">Done</button>
+        </div>
+        <div class="row adder">
+          <input class="field" id="addIn" placeholder="Type new words to add" autocomplete="off" style="flex:1;min-width:10rem" aria-label="New words">
+          <button class="btn small" id="addBtn">Add</button>
+          <button class="btn ghost small" id="delBtn" disabled>🗑 Remove selected word</button>
+        </div>
+        <div class="row adder" style="margin-top:.5rem">
+          <span class="muted" style="font-size:.95rem">Punctuation:</span>
+          <button class="btn ghost small pbtn" data-p=",">,</button>
+          <button class="btn ghost small pbtn" data-p=".">.</button>
+          <button class="btn ghost small pbtn" data-p="!">!</button>
+          <button class="btn ghost small pbtn" data-p="?">?</button>
+          <button class="btn ghost small pbtn" data-p="–">–</button>
+          <button class="btn ghost small" id="restartTiles" style="margin-left:auto">Start again</button>
+        </div>
+        <p class="muted addNote" style="font-size:.9rem;margin:.5rem 0 0">New words go after the word you've tapped, or at the end. Words in colour are new this round.</p>
+        <p id="lockNote">Round done! Press the button below to start the next round.</p>
+      </div>
+      <div class="row" style="margin-top:.8rem;justify-content:space-between">
+        <div class="row">
+          <button class="btn" id="checkBtn">Check my sentence</button>
+          <button class="btn ghost small" id="speakBtn">🔊 Read it aloud</button>
+        </div>
+        <button class="btn ghost small" id="copyBtn" title="Fills in your last sentence. No typing score for this round.">Start from last sentence</button>
+      </div>
+      <div id="fb"></div>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <button class="btn ghost small" id="quitBtn">Back to sentences</button>
+    </div>
+  </section>
+
+  <!-- FINISH -->
+  <section id="finish" hidden>
+    <div class="panel">
+      <div class="big" id="finTitle">Glowed up!</div>
+      <p class="muted" style="margin:.3rem 0 0" id="finStats"></p>
+    </div>
+    <div class="panel">
+      <h2>How your sentence grew</h2>
+      <div class="legend" id="legend"></div>
+      <ol class="ladder" id="ladder"></ol>
+      <div class="row" style="margin-top:1rem">
+        <button class="btn ghost small" id="finSpeak">🔊 Read the final sentence</button>
+        <button class="btn ghost small" id="finCopy">📋 Copy all rounds</button>
+      </div>
+      <p class="muted" style="margin:1rem 0 0;font-size:.95rem">The game checks you added the right kind of word, but it can't check everything. Ask a grown-up to read your final sentence with you.</p>
+    </div>
+    <div class="panel" id="newBadgesBox" hidden>
+      <h2>New badges</h2>
+      <div class="badges" id="newBadges"></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="againBtn">Choose another sentence</button>
+    </div>
+  </section>
+
+  <footer><button id="resetBtn">Change player or reset progress</button></footer>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+
+/* ---------- data ---------- */
+var BANK=[
+ "The girl walked up the hill.",
+ "A cat sat on the wall.",
+ "The boy opened the door.",
+ "The wind blew through the camp.",
+ "Sam found a map in the tent.",
+ "They climbed the mountain.",
+ "The dog barked at the postman.",
+ "A bird landed on the fence.",
+ "The children played in the park.",
+ "Mum put the cake in the oven.",
+ "The ship sailed across the sea.",
+ "A fox crept into the garden.",
+ "The rain fell on the roof.",
+ "Grandpa sat by the fire.",
+ "The train stopped at the station.",
+ "An owl hooted in the tree.",
+ "Lily kicked the ball over the wall.",
+ "The car drove down the road.",
+ "The baby slept in the cot.",
+ "A spider spun a web in the corner.",
+ "The knight rode to the castle.",
+ "The teacher wrote on the board.",
+ "A horse galloped across the field.",
+ "The snow covered the village.",
+ "Tom hid behind the curtain.",
+ "The fish swam under the bridge.",
+ "The robot walked into the room.",
+ "A dragon flew over the town.",
+ "The girls ran along the beach.",
+ "The old man walked his dog."
+];
+var SHOW=6;
+var PREP=new Set("about above across after against along alongside amid amidst among amongst around at before behind below beneath beside besides between beyond by down during except for from in inside into near next of off on onto opposite out outside over past round since through throughout till to toward towards under underneath until up upon with within without".split(" "));
+var CONJ=new Set("and but or so because although though while whilst until unless as since when whenever after before if once even yet nor wherever".split(" "));
+var SIMPLE_CONJ=new Set(["and","but","or","so","yet","nor"]);
+var FUNC=new Set("a an the this that these those his her its their my your our he she it they we i you him them me us was were is are be been had has have did do does to very".split(" "));
+FUNC.forEach&&0;
+var ROUNDS=[
+ {name:"Adjectives",title:"Round 1: Add or upgrade adjectives",
+  tip:"Find the nouns (people, places, things). Add a describing word before them, or swap a plain one for something sharper.",
+  eg:"A deer → An agile and hungry deer",
+  bank:["towering","battered","weary","delicate","gloomy","sparkling","enormous","ancient","scruffy","eerie","gleaming","exhausted","curious","crumbling"],
+  powers:[
+   {text:"add two new adjectives",test:function(c){return c.addedContent.length>=2}},
+   {text:"join two adjectives with \u201cand\u201d",test:function(c){return c.addedNorms.indexOf("and")>-1&&c.addedContent.length>=2}}
+  ]},
+ {name:"Prepositions",title:"Round 2: Upgrade the preposition",
+  tip:"Prepositions say where or when: on, in, at, by. Swap one for a more exact word, or add a new \u201cwhere\u201d phrase.",
+  eg:"on the wall → along the crumbling wall",
+  bank:["across","beneath","among","beyond","alongside","throughout","underneath","deep within","on top of","towards","through"],
+  powers:[
+   {text:"use \u201cbeneath\u201d, \u201camong\u201d or \u201cbeyond\u201d",test:function(c){return ["beneath","among","amongst","beyond"].some(function(w){return c.addedNorms.indexOf(w)>-1})}},
+   {text:"add a whole new \u201cwhere\u201d phrase (3 or more new words)",test:function(c){return c.addedNorms.length>=3}}
+  ]},
+ {name:"Fronted adverbial",title:"Round 3: Add a fronted adverbial",
+  tip:"Add a phrase at the very start that says how, when or where. Put a comma straight after it.",
+  eg:"Slowly, the girl… / As dusk fell, the girl…",
+  bank:["Slowly,","Carefully,","Without a word,","With a sigh,","Moments later,","As dusk fell,","At last,","Deep in the woods,","Across the field,"],
+  powers:[
+   {text:"start with a word ending in \u201c-ly\u201d",test:function(c){return /ly$/.test(c.newNorms[0]||"")}},
+   {text:"start with \u201cAs\u201d",test:function(c){return c.newNorms[0]==="as"}},
+   {text:"start with a time phrase, like \u201cMoments later,\u201d",test:function(c){var o=c.opener.toLowerCase();return /\b(later|soon|dawn|dusk|night|morning|evening|last|finally|eventually|meanwhile|suddenly|after|before|when|once|until|then|minute|moment|hour|day)\b/.test(o)}}
+  ]},
+ {name:"Conjunction",title:"Round 4: Add a conjunction",
+  tip:"Join on a new idea with a conjunction. Conjunctions are signposts, so pick one whose job fits: because (a reason), although (a surprise), whilst (at the same time), so (a result), until (time).",
+  eg:"…watched the deer whilst photographers waited in silence.",
+  bank:["because","although","whilst","while","until","unless","as","so","even though","before","after"],
+  powers:[
+   {text:"use \u201calthough\u201d",test:function(c){return c.addedNorms.indexOf("although")>-1}},
+   {text:"use \u201cuntil\u201d",test:function(c){return c.addedNorms.indexOf("until")>-1}},
+   {text:"use \u201cwhilst\u201d",test:function(c){return c.addedNorms.indexOf("whilst")>-1}}
+  ]},
+ {name:"Freestyle",title:"Round 5: Freestyle",
+  tip:"Make anything better: a simile, a \u201cwho\u201d or \u201cwhich\u201d clause, a stronger verb, a dash. You can also cut words that feel crowded.",
+  eg:"…the cat, which was as black as coal, …",
+  bank:["like a","as bright as",", who",", which","\u2013","trudged","whispered","glistening"],
+  powers:[
+   {text:"add a simile (like a… / as… as…)",test:function(c){return c.newHas(/\blike (a|an|the)\b|\bas \w+ as\b/i)}},
+   {text:"add a \u201cwho\u201d or \u201cwhich\u201d clause",test:function(c){return c.newHas(/,\s*(who|which|whose)\b/i)}},
+   {text:"use a dash",test:function(c){return c.newHas(/\s[\u2013\u2014-]\s/)}}
+  ]}
+];
+var LEVELS=[[0,"Word Apprentice"],[60,"Adjective Ace"],[150,"Clause Commander"],[300,"Sentence Wizard"],[500,"Grammar Legend"]];
+var BADGES=[
+ {id:"first",ico:"🌱",name:"First Glow-Up",desc:"Finish a sentence"},
+ {id:"comma",ico:"✏️",name:"Comma Champion",desc:"Nail Round 3 first try"},
+ {id:"fancy",ico:"🔗",name:"Clause Captain",desc:"Match a conjunction to its job"},
+ {id:"simile",ico:"🌟",name:"Simile Star",desc:"Write a simile"},
+ {id:"power3",ico:"⚡",name:"Power Player",desc:"Complete 3 power-ups"},
+ {id:"power10",ico:"🚀",name:"Power Pro",desc:"Complete 10 power-ups"},
+ {id:"speed15",ico:"🐇",name:"Quick Fingers",desc:"Type at 15 wpm"},
+ {id:"speed25",ico:"⚡️",name:"Lightning Keys",desc:"Type at 25 wpm"},
+ {id:"allsix",ico:"🏆",name:"Full House",desc:"Finish 6 sentences"},
+ {id:"all30",ico:"📚",name:"Sentence Collector",desc:"Finish all 30 sentences"}
+];
+
+/* ---------- storage ---------- */
+var KEY="sentence-glow-up-v1";
+function freshProgress(){return {stars:0,bestWpm:0,badges:[],powers:0,shown:[0,1,2,3,4,5],next:SHOW,history:[]}}
+function fillShown(){while(state.shown.length<SHOW&&state.next<BANK.length)state.shown.push(state.next++)}
+var store={current:"",players:{},mode:"type"};
+try{
+  var raw=localStorage.getItem(KEY);
+  if(raw){var p=JSON.parse(raw);
+    if(p&&p.players){store=Object.assign(store,p)}
+    else if(p&&typeof p==="object"){ /* older single-player save */
+      store.mode=p.mode||"type";store.current=p.name||"";
+      store.players[store.current]={stars:p.stars||0,bestWpm:p.bestWpm||0,badges:p.badges||[],done:p.done||{},powers:p.powers||0};
+    }}
+}catch(e){}
+var state;
+function loadPlayer(n){
+  var pr=store.players[n]||freshProgress();
+  var shown=pr.shown?pr.shown.slice():[0,1,2,3,4,5].filter(function(i){return !(pr.done&&pr.done[i])});
+  state={name:n,mode:store.mode,stars:pr.stars||0,bestWpm:pr.bestWpm||0,badges:(pr.badges||[]).slice(),powers:pr.powers||0,
+    shown:shown,next:typeof pr.next==="number"?pr.next:SHOW,history:(pr.history||[]).slice()};
+  fillShown();
+}
+loadPlayer(store.current);
+function save(){
+  store.mode=state.mode;store.current=state.name;
+  store.players[state.name]={stars:state.stars,bestWpm:state.bestWpm,badges:state.badges,powers:state.powers,shown:state.shown,next:state.next,history:state.history};
+  if(state.name&&store.players[""])delete store.players[""];
+  try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}
+}
+
+/* ---------- helpers ---------- */
+function esc(s){return String(s).replace(/[&<>"']/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]})}
+function toks(s){return s.trim().split(/\s+/).filter(Boolean)}
+function norm(t){return t.toLowerCase().replace(/[\u2018\u2019]/g,"'").replace(/[^a-z'\-]/g,"").replace(/^[-']+|[-']+$/g,"")}
+function lcs(a,b){
+  var n=a.length,m=b.length,dp=[],i,j;
+  for(i=0;i<=n;i++){dp.push(new Array(m+1).fill(0))}
+  for(i=n-1;i>=0;i--)for(j=m-1;j>=0;j--){
+    dp[i][j]=(a[i]&&a[i]===b[j])?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  }
+  var map=new Array(m).fill(-1);i=0;j=0;
+  while(i<n&&j<m){
+    if(a[i]&&a[i]===b[j]){map[j]=i;i++;j++}
+    else if(dp[i+1][j]>=dp[i][j+1])i++;else j++;
+  }
+  return map;
+}
+function render(v){
+  return v.tokens.map(function(t,i){var c=v.colors[i];return c?'<mark class="r'+c+'">'+esc(t)+"</mark>":esc(t)}).join(" ");
+}
+function toast(msg){var t=$("toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(function(){t.hidden=true},2600)}
+function speak(text){
+  try{
+    if(!("speechSynthesis" in window)){toast("Reading aloud isn't available here. Read it to a grown-up instead!");return}
+    speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(text);u.lang="en-GB";u.rate=.92;
+    var vs=speechSynthesis.getVoices().filter(function(v){return /en-GB/i.test(v.lang)});
+    if(vs.length)u.voice=vs[0];
+    speechSynthesis.speak(u);
+  }catch(e){toast("Reading aloud isn't available here.")}
+}
+function levelInfo(s){
+  var cur=LEVELS[0],next=null;
+  for(var i=0;i<LEVELS.length;i++){if(s>=LEVELS[i][0]){cur=LEVELS[i];next=LEVELS[i+1]||null}}
+  var pct=next?Math.round((s-cur[0])/(next[0]-cur[0])*100):100;
+  return {name:cur[1],next:next,pct:pct};
+}
+function award(id,list){if(state.badges.indexOf(id)===-1){state.badges.push(id);if(list)list.push(id);var b=BADGES.find(function(x){return x.id===id});toast("New badge: "+b.ico+" "+b.name)}}
+
+/* ---------- home ---------- */
+function show(id){["home","play","finish"].forEach(function(s){$(s).hidden=s!==id});window.scrollTo(0,0)}
+function refreshTop(){$("starPill").textContent="⭐ "+state.stars;$("wpmPill").textContent="⌨️ best "+state.bestWpm+" wpm"}
+function renderHome(){
+  refreshTop();$("gremHomeTip").hidden=!wgRead();
+  $("nameBox").hidden=!!state.name;
+  $("hello").textContent=state.name?"Hi "+state.name+"! Ready to glow up some sentences?":"Ready to glow up some sentences?";
+  var L=levelInfo(state.stars);
+  $("lvlName").textContent="Level: "+L.name;
+  $("lvlNext").textContent=L.next?(L.next[0]-state.stars)+" stars to "+L.next[1]:"Top level reached!";
+  $("lvlFill").style.width=L.pct+"%";
+  var doneCount=state.next-state.shown.length;
+  $("pickHead").textContent="Choose a sentence ("+doneCount+" of "+BANK.length+" done)";
+  $("picks").innerHTML=state.shown.length?state.shown.map(function(i){
+    return '<button class="pick" data-i="'+i+'"><span>'+esc(BANK[i])+'</span><span class="muted" style="font-size:.85rem;white-space:nowrap">#'+(i+1)+"</span></button>";
+  }).join(""):'<div><p style="margin:0 0 .6rem;font-weight:700">🎉 You\u2019ve finished all '+BANK.length+' sentences!</p><button class="btn small" id="restartBank">Start the 30 again</button></div>';
+  renderHistory();
+  $("badges").innerHTML=BADGES.map(badgeHtml).join("");
+  $("badgeHead").textContent="Badges: "+state.badges.length+" of "+BADGES.length+" earned";
+  [].forEach.call(document.querySelectorAll(".mode"),function(b){b.setAttribute("aria-checked",String(b.dataset.mode===state.mode))});
+}
+$("modes").addEventListener("click",function(e){var b=e.target.closest(".mode");if(b){state.mode=b.dataset.mode;save();renderHome()}});
+function badgeHtml(b){var on=state.badges.indexOf(b.id)>-1;return '<div class="badge'+(on?" on":"")+'"><span class="ico">'+(on?b.ico:"🔒")+"</span><b>"+esc(b.name)+"</b>"+esc(b.desc)+"</div>"}
+$("picks").addEventListener("click",function(e){
+  if(e.target.closest("#restartBank")){state.shown=[];state.next=0;fillShown();save();renderHome();return}
+  var b=e.target.closest(".pick");if(b)start(BANK[+b.dataset.i],+b.dataset.i);
+});
+$("nameSave").addEventListener("click",function(){var n=$("nameIn").value.trim();if(n){state.name=n;save();renderHome()}});
+$("nameIn").addEventListener("keydown",function(e){if(e.key==="Enter")$("nameSave").click()});
+$("ownGo").addEventListener("click",function(){
+  var s=$("ownIn").value.trim();
+  if(toks(s).length<3){$("ownErr").hidden=false;return}
+  $("ownErr").hidden=true;
+  if(!/[.!?]$/.test(s))s+=".";
+  s=s.charAt(0).toUpperCase()+s.slice(1);
+  start(s,-1);
+});
+$("ownIn").addEventListener("keydown",function(e){if(e.key==="Enter")$("ownGo").click()});
+
+/* ---------- play ---------- */
+var G=null;
+function start(sentence,idx){
+  var t=toks(sentence);
+  G={idx:idx,versions:[{text:sentence,tokens:t,colors:t.map(function(){return 0})}],round:1,stars:0,wpms:[],firstTry:true,usedCopy:false,startTime:null,newBadges:[],power:null};
+  gremSetup();setupRound();show("play");
+}
+function setupRound(){
+  var R=ROUNDS[G.round-1];
+  G.firstTry=true;G.usedCopy=false;G.startTime=null;
+  G.power=R.powers[Math.floor(Math.random()*R.powers.length)];
+  $("rounds").innerHTML=ROUNDS.map(function(r,i){
+    var n=i+1,cls=n===G.round?"now":(n<G.round?"past":"");
+    var style=n===G.round?' style="background:var(--r'+n+')"':(n<G.round?' style="border-color:var(--r'+n+');color:var(--r'+n+')"':"");
+    return '<div class="rd '+cls+'"'+style+'><b>'+(n<G.round?"✓":n)+"</b>"+esc(r.name)+"</div>";
+  }).join("");
+  $("stageLbl").textContent=G.round===1?"Your basic sentence":"Your sentence so far";
+  $("stage").innerHTML=render(G.versions[G.versions.length-1]);
+  $("taskTitle").textContent=R.title;$("taskTitle").style.color="var(--r"+G.round+")";
+  $("taskTip").textContent=R.tip;$("taskEg").textContent="Example: "+R.eg;
+  $("bankBox").open=false;
+  $("signGuide").hidden=G.round!==4;
+  $("powerText").textContent=G.power.text;
+  $("typer").value="";$("fb").innerHTML="";$("checkBtn").hidden=false;
+  updateCount();$("liveWpm").textContent="⌨️ Start typing…";
+  $("wordArea").classList.remove("locked");$("typer").readOnly=false;
+  W.asText=false;W.tiles=splitTiles(lastText());W.sel=-1;setAsText(false);
+  applyMode(true);renderChallenges();
+}
+function updateCount(){var n=toks($("typer").value).length;$("count").textContent=n+(n===1?" word":" words")}
+function currentWpm(){
+  if(state.mode==="words")return null;
+  if(!G.startTime||G.usedCopy)return null;
+  var mins=(Date.now()-G.startTime)/60000;if(mins<0.08)return null;
+  return Math.round(($("typer").value.length/5)/mins);
+}
+$("typer").addEventListener("input",function(){
+  if(!G.startTime&&$("typer").value.length)G.startTime=Date.now();
+  updateCount();
+  var w=currentWpm();$("liveWpm").textContent=G.usedCopy?"⌨️ No typing score this round":(w===null?"⌨️ Typing…":"⌨️ "+w+" words per minute");
+});
+$("typer").addEventListener("paste",function(e){e.preventDefault();toast("Typing practice! Type it out instead of pasting.")});
+$("typer").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(!$("checkBtn").hidden)check()}});
+$("copyBtn").addEventListener("click",function(){
+  G.usedCopy=true;$("typer").value=G.versions[G.versions.length-1].text;updateCount();
+  $("liveWpm").textContent="⌨️ No typing score this round";$("typer").focus();
+});
+$("speakBtn").addEventListener("click",function(){speak(attemptText()||lastText())});
+$("quitBtn").addEventListener("click",function(){renderHome();show("home")});
+$("checkBtn").addEventListener("click",check);
+
+function analyse(prevV,text){
+  var newT=toks(text),newN=newT.map(norm),prevN=prevV.tokens.map(norm);
+  var map=lcs(prevN,newN);
+  var matched=map.filter(function(x){return x>-1}).length;
+  var addedIdx=[];newN.forEach(function(n,i){if(map[i]===-1)addedIdx.push(i)});
+  var addedNorms=addedIdx.map(function(i){return newN[i]}).filter(Boolean);
+  var addedContent=addedNorms.filter(function(w){return !PREP.has(w)&&!CONJ.has(w)&&!FUNC.has(w)});
+  var comma=text.indexOf(",");
+  return {
+    prevText:prevV.text,newText:text,newTokens:newT,newNorms:newN,map:map,addedIdx:addedIdx,
+    addedNorms:addedNorms,addedContent:addedContent,
+    removed:prevN.filter(Boolean).length-matched,prevCount:prevN.filter(Boolean).length,
+    comma:comma,opener:comma>-1?text.slice(0,comma):"",
+    newHas:function(re){return re.test(text)&&!re.test(prevV.text)}
+  };
+}
+function judge(r,c){
+  if(c.newText.replace(/\s+/g," ")===c.prevText.replace(/\s+/g," "))return {pass:false,hint:"That's the same as before. Change something for this round."};
+  if(r<5&&c.prevCount>0&&c.removed>c.prevCount*0.5)return {pass:false,hint:"Lots of your old sentence has gone. Keep the sentence and build on it."};
+  var extras=[];
+  if(r===1){
+    if(c.addedContent.length>=1)return {pass:true,msg:"Great describing words!",extras:extras};
+    return {pass:false,hint:"Add a describing word before one of the nouns, like \u201cgloomy\u201d or \u201cscruffy\u201d."};
+  }
+  if(r===2){
+    if(c.addedNorms.some(function(w){return PREP.has(w)}))return {pass:true,msg:"Now we know exactly where!",extras:extras};
+    return {pass:false,hint:"Swap or add a \u201cwhere\u201d word, like beneath, across or among."};
+  }
+  if(r===3){
+    var startNew=c.addedIdx.indexOf(0)>-1;
+    if(c.comma===-1)return {pass:false,hint:startNew?"So close! Put a comma straight after your fronted adverbial.":"Add a phrase at the very start that says how, when or where, then a comma."};
+    var openerWords=toks(c.opener).length;
+    var openerNew=c.addedIdx.some(function(i){return i<openerWords});
+    if(openerNew&&openerWords<=9)return {pass:true,msg:"Brilliant fronted adverbial, and you remembered the comma!",extras:extras};
+    return {pass:false,hint:"Put your new how, when or where phrase at the very start of the sentence, followed by a comma."};
+  }
+  if(r===4){
+    var cj=c.addedNorms.filter(function(w){return CONJ.has(w)});
+    if(!cj.length)return {pass:false,hint:"Join on a new idea with a conjunction like because, although or until."};
+    return {pass:true,msg:"Good joining!",extras:extras,conj:pickConj(c,cj)};
+  }
+  if(c.newHas(/\blike (a|an|the)\b|\bas \w+ as\b/i))extras.push({label:"Simile",pts:3,badge:"simile"});
+  if(c.newHas(/,\s*(who|which|whose|where)\b/i))extras.push({label:"Relative clause",pts:3});
+  if(c.newHas(/\s[\u2013\u2014-]\s|;|:|\(/))extras.push({label:"Clever punctuation",pts:3});
+  return {pass:true,msg:extras.length?"Freestyle flair!":"Nice improvement! A simile or a \u201cwhich\u201d clause would earn bonus stars.",extras:extras};
+}
+function check(){
+  var text=attemptText();
+  if(toks(text).length<3){showFb(false,"Type the whole sentence, with your upgrade in it.");return}
+  var prev=G.versions[G.versions.length-1];
+  var c=analyse(prev,text);
+  var j=judge(G.round,c);
+  if(!j.pass){G.firstTry=false;showFb(false,j.hint,c);return}
+  if(G.round===4&&j.conj&&WORDJOBS[j.conj]){G.wpmAtCheck=currentWpm();signpost(c,j);return}
+  finishRound(c,j,false);
+}
+
+/* ---------- signpost check (round 4) ---------- */
+var JOBS={
+ reason:{label:"Giving a reason",promise:"here comes the reason",test:"Is the second part really the reason?"},
+ surprise:{label:"A surprise or opposite",promise:"here comes something you wouldn\u2019t expect",test:"Is the second part something you wouldn\u2019t expect after the first part?"},
+ same:{label:"Happening at the same time",promise:"this is happening at the same moment",test:"Are both things really happening at the same moment?"},
+ result:{label:"What happened as a result",promise:"here comes what happened because of it",test:"Did the second part really happen because of the first?"},
+ time:{label:"Time order",promise:"here\u2019s when it happened: before, after, or up to a moment",test:"Do the events make sense in that order?"},
+ condition:{label:"Only if\u2026",promise:"this only happens if something else does",test:"Does one part really depend on the other?"},
+ add:{label:"Adding another idea",promise:"here\u2019s another idea that goes with the first",test:"Do the two ideas really belong together?"},
+ choice:{label:"A choice",promise:"it\u2019s one thing or the other",test:"Is it really a choice between two things?"}
+};
+var WORDJOBS={because:["reason"],as:["reason","same"],since:["reason","time"],although:["surprise"],though:["surprise"],"even though":["surprise"],but:["surprise"],yet:["surprise"],
+ while:["same","surprise"],whilst:["same","surprise"],when:["same","time"],whenever:["same","time"],until:["time"],before:["time"],after:["time"],once:["time"],
+ so:["result"],if:["condition"],unless:["condition"],and:["add"],or:["choice"],nor:["choice"]};
+function pickConj(c,cj){
+  if(c.addedNorms.indexOf("even")>-1&&c.addedNorms.indexOf("though")>-1)return "even though";
+  var f=cj.filter(function(w){return !SIMPLE_CONJ.has(w)});
+  return f[0]||cj[0];
+}
+function signpost(c,j){
+  var word=j.conj,ok=WORDJOBS[word],tries=0,extras=(j.extras||[]).slice();
+  var opts=["reason","surprise","same","result","time","add"];
+  ok.forEach(function(k){if(opts.indexOf(k)<0)opts.push(k)});
+  $("checkBtn").hidden=true;$("copyBtn").hidden=true;
+  function ask(msg){
+    $("fb").innerHTML='<div class="fb sp"><h3>🪧 Signpost check</h3>'+(msg||"")+'<p style="margin:.3rem 0 .6rem">Conjunctions are signposts: they tell the reader what kind of idea is coming next. What job is <b>\u201c'+esc(word)+'\u201d</b> doing in your sentence?</p><div class="chips">'+opts.map(function(k){return '<button type="button" class="btn ghost small" data-job="'+k+'">'+esc(JOBS[k].label)+"</button>"}).join("")+"</div></div>";
+  }
+  ask();
+  $("fb").onclick=function(e){
+    var b=e.target.closest("button");if(!b)return;var d=b.dataset;
+    if(d.job){
+      tries++;
+      if(ok.indexOf(d.job)>-1){
+        extras.push({label:"Signpost spotted",pts:tries===1?5:2});
+        if(tries===1)award("fancy",G.newBadges);
+        var J=JOBS[d.job];
+        $("fb").innerHTML='<div class="fb sp"><h3>✅ Yes! \u201c'+esc(word)+'\u201d means: '+esc(J.promise)+'.</h3><p style="margin:.4rem 0 .2rem">Now read your sentence out loud:</p><p class="stage" style="font-size:1.2rem;margin:.2rem 0 .6rem">'+esc(c.newText)+'</p><p style="margin:0 0 .7rem"><b>'+esc(J.test)+'</b></p><div class="row"><button class="btn small" data-sense="yes">Yes, it makes sense</button><button class="btn ghost small" data-sense="no">Not really</button></div></div>';
+      }else{
+        ask('<p class="sp-wrong">Not quite. \u201c'+esc(word)+'\u201d is a signpost for <b>'+ok.map(function(k){return esc(JOBS[k].label.toLowerCase())}).join("</b> or <b>")+"</b>: "+esc(JOBS[ok[0]].promise)+". Pick that one to carry on.</p>");
+      }
+      return;
+    }
+    if(d.sense==="yes"){
+      extras.push({label:"Makes sense",pts:3});
+      $("fb").onclick=null;
+      finishRound(c,{pass:true,msg:"Great joining, and your signpost points the right way!",extras:extras},false);return;
+    }
+    if(d.sense==="no"){
+      $("fb").innerHTML='<div class="fb sp"><h3>Good checking! 🕵️</h3><p style="margin:.3rem 0 .8rem">Spotting that is exactly what good writers do. You could change the words after \u201c'+esc(word)+'\u201d so they fit its job, or pick a different signpost: because (reason), although (surprise), whilst (same time), so (result), until (time).</p><div class="row"><button class="btn small" data-fix="1">Change my sentence</button><button class="btn ghost small" data-keep="1">Keep it and move on</button></div></div>';
+      return;
+    }
+    if(d.fix){
+      $("fb").onclick=null;$("fb").innerHTML="";G.wpmAtCheck=undefined;
+      $("checkBtn").hidden=false;$("copyBtn").hidden=state.mode==="words";
+      if(state.mode!=="words")$("typer").focus();
+      return;
+    }
+    if(d.keep){
+      $("fb").onclick=null;
+      finishRound(c,{pass:true,msg:"OK! Keep checking your signposts: it\u2019s a great habit.",extras:extras},false);
+    }
+  };
+}
+function showFb(ok,hint,c){
+  var h='<div class="fb no"><h3>Not quite yet</h3><p style="margin:.3rem 0 .8rem">'+esc(hint)+'</p><div class="row"><button class="btn small" id="retry">Try again</button>'+(c?'<button class="btn ghost small" id="skipOn">Move on anyway (fewer stars)</button>':"")+"</div></div>";
+  $("fb").innerHTML=h;
+  $("retry").onclick=function(){$("fb").innerHTML="";if(state.mode!=="words")$("typer").focus()};
+  if(c)$("skipOn").onclick=function(){finishRound(c,{pass:false,msg:"Moving on. You can come back and try this round again another time.",extras:[]},true)};
+}
+function finishRound(c,j,skipped){
+  var lines=[],total=0;
+  var base=skipped?4:10;lines.push([skipped?"Round done":"Round complete",base]);total+=base;
+  if(!skipped&&G.round===3&&G.firstTry)award("comma",G.newBadges);
+  (j.extras||[]).forEach(function(x){lines.push([x.label,x.pts]);total+=x.pts;if(x.badge)award(x.badge,G.newBadges)});
+  if(/^[A-Z]/.test(c.newText)&&/[.!?]["'\u2019\u201d]?$/.test(c.newText)){lines.push(["Capital letter and full stop",2]);total+=2}
+  if(!skipped&&G.power.test(c)){lines.push(["⚡ Power-up",5]);total+=5;state.powers++;if(state.powers>=3)award("power3",G.newBadges);if(state.powers>=10)award("power10",G.newBadges)}
+  var gx=gremCheck(c);gx.lines.forEach(function(l){lines.push(l);total+=l[1]});
+  var w=G.wpmAtCheck!==undefined?G.wpmAtCheck:currentWpm();G.wpmAtCheck=undefined;
+  if(w!==null&&w<200){
+    G.wpms.push(w);
+    if(w>state.bestWpm){if(state.bestWpm>0){lines.push(["New typing record ("+w+" wpm)",3]);total+=3}state.bestWpm=w}
+    if(w>=15)award("speed15",G.newBadges);if(w>=25)award("speed25",G.newBadges);
+  }
+  G.stars+=total;state.stars+=total;save();refreshTop();wgAddStars(total);
+  // colour the new version
+  var prev=G.versions[G.versions.length-1];
+  var colors=c.newTokens.map(function(t,i){return c.map[i]>-1?prev.colors[c.map[i]]:G.round});
+  G.versions.push({text:c.newText,tokens:c.newTokens,colors:colors});
+  $("stage").innerHTML=render(G.versions[G.versions.length-1]);
+  var last=G.round===5;
+  if(last)recordFinished();
+  $("fb").innerHTML='<div class="fb ok"><h3>'+(skipped?"On we go":"Yes! +"+total+" ⭐")+'</h3><p style="margin:.3rem 0 0">'+esc(j.msg)+"</p><ul>"+lines.map(function(l){return"<li>"+esc(l[0])+": +"+l[1]+"</li>"}).join("")+(w!==null?"<li>Typing speed: "+w+" words per minute</li>":"")+'</ul>'+(gx.notes.length?'<div class="gnotes">'+gx.notes.map(function(n){return "<p>"+n+"</p>"}).join("")+"</div>":"")+'<button class="btn" id="nextBtn">'+(last?"See how it grew":"Next round")+"</button></div>";
+  $("checkBtn").hidden=true;$("copyBtn").hidden=true;$("wordArea").classList.add("locked");$("typer").readOnly=true;
+  $("nextBtn").focus();
+  $("nextBtn").onclick=function(){if(last)finishSentence();else{G.round++;setupRound();window.scrollTo(0,0)}};
+}
+
+/* ---------- word builder ---------- */
+var W={tiles:[],sel:-1,asText:false};
+var PUNCT=/^[^A-Za-z0-9]$/;
+function lastText(){return G.versions[G.versions.length-1].text}
+function splitTiles(s){return (String(s).match(/[A-Za-z0-9\u2019'\-]+|[^\sA-Za-z0-9\u2019'\-]/g)||[])}
+function joinTiles(a){
+  var out="";
+  a.forEach(function(t,i){
+    if(i===0){out=t;return}
+    var noBefore=/^[,.!?;:)\]\u2019\u201d]$/.test(t), noAfterPrev=/^[(\[\u2018\u201c]$/.test(a[i-1]);
+    out+=(noBefore||noAfterPrev?"":" ")+t;
+  });
+  return out;
+}
+function attemptText(){
+  var t=state.mode==="words"?(W.asText?$("wordText").value:joinTiles(W.tiles)):$("typer").value;
+  return t.trim().replace(/\s+/g," ");
+}
+function applyMode(focus){
+  var words=state.mode==="words";
+  $("typeArea").hidden=words;$("wordArea").hidden=!words;
+  $("copyBtn").hidden=words||$("checkBtn").hidden;
+  [].forEach.call(document.querySelectorAll(".segb"),function(b){b.setAttribute("aria-checked",String(b.dataset.mode===state.mode))});
+  $("wordArea").style.setProperty("--rc","var(--r"+G.round+")");
+  renderBank();
+  if(words)renderBoard();else if(focus)$("typer").focus({preventScroll:true});
+}
+function renderBank(){
+  var R=ROUNDS[G.round-1],words=state.mode==="words";
+  var cat={};(wgRead()||{c:[]}).c.forEach(function(x){cat[x.w]=1});
+  $("bank").innerHTML=R.bank.filter(function(w){return !cat[w.toLowerCase()]}).map(function(w){
+    return words?'<button type="button" class="chip add" data-w="'+esc(w)+'">+ '+esc(w)+"</button>":'<span class="chip">'+esc(w)+"</span>";
+  }).join("");
+}
+$("bank").addEventListener("click",function(e){
+  var b=e.target.closest(".chip.add");
+  if(b&&!$("wordArea").classList.contains("locked"))insertTiles(splitTiles(b.dataset.w.replace(/\u2026/g,"")));
+});
+function renderBoard(){
+  if(W.sel>=W.tiles.length)W.sel=-1;
+  var prev=splitTiles(lastText()).map(function(t){return t.toLowerCase()});
+  var map=lcs(prev,W.tiles.map(function(t){return t.toLowerCase()}));
+  $("board").innerHTML=W.tiles.length?W.tiles.map(function(t,i){
+    var cls="tile"+(PUNCT.test(t)?" p":"")+(map[i]===-1?" new":"")+(i===W.sel?" sel":"");
+    return '<button type="button" class="'+cls+'" data-i="'+i+'" aria-pressed="'+(i===W.sel)+'">'+esc(t)+"</button>";
+  }).join(""):'<span class="muted">No words yet. Add some below.</span>';
+  $("tileTools").hidden=W.asText||W.sel<0;
+  $("delBtn").disabled=W.asText||W.sel<0;
+  $("delBtn").textContent=W.sel>=0?"🗑 Remove \u201c"+W.tiles[W.sel]+"\u201d":"🗑 Remove selected word";
+  if(W.sel>=0)$("selWord").textContent=W.tiles[W.sel];
+}
+function setAsText(on){
+  if(on)$("wordText").value=joinTiles(W.tiles);
+  else if(W.asText){W.tiles=splitTiles($("wordText").value);W.sel=-1}
+  W.asText=on;
+  $("wordText").hidden=!on;$("board").hidden=on;
+  $("asTextBtn").textContent=on?"🧩 Back to word tiles":"✏️ Edit as text";
+  $("boardHelp").textContent=on?"Type, edit or paste the whole sentence here.":"Drag words to move them. Tap a word to move, change or remove it.";
+  renderBoard();
+  if(on)$("wordText").focus();
+}
+function insertTiles(arr){
+  if(!arr.length)return;
+  if(W.asText){$("wordText").value=joinTiles(splitTiles($("wordText").value).concat(arr));return}
+  var at=W.sel>=0?W.sel+1:W.tiles.length;
+  W.tiles.splice.apply(W.tiles,[at,0].concat(arr));
+  W.sel=at+arr.length-1;renderBoard();
+}
+$("asTextBtn").addEventListener("click",function(){setAsText(!W.asText)});
+$("addBtn").addEventListener("click",function(){insertTiles(splitTiles($("addIn").value));$("addIn").value="";$("addIn").focus()});
+$("addIn").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();$("addBtn").click()}});
+[].forEach.call(document.querySelectorAll(".pbtn"),function(b){b.addEventListener("click",function(){insertTiles([b.dataset.p])})});
+$("restartTiles").addEventListener("click",function(){W.asText=false;W.tiles=splitTiles(lastText());W.sel=-1;setAsText(false)});
+function moveSel(d){var i=W.sel,j=i+d;if(i<0||j<0||j>=W.tiles.length)return;var t=W.tiles[i];W.tiles[i]=W.tiles[j];W.tiles[j]=t;W.sel=j;renderBoard()}
+$("tLeft").addEventListener("click",function(){moveSel(-1)});
+$("tRight").addEventListener("click",function(){moveSel(1)});
+$("tCase").addEventListener("click",function(){if(W.sel<0)return;var t=W.tiles[W.sel],f=t.charAt(0);W.tiles[W.sel]=(f===f.toUpperCase()?f.toLowerCase():f.toUpperCase())+t.slice(1);renderBoard()});
+function removeSel(){if(W.sel<0||$("wordArea").classList.contains("locked"))return;W.tiles.splice(W.sel,1);W.sel=-1;renderBoard()}
+$("tDel").addEventListener("click",removeSel);
+$("delBtn").addEventListener("click",removeSel);
+$("board").addEventListener("keydown",function(e){if((e.key==="Delete"||e.key==="Backspace")&&W.sel>=0){e.preventDefault();removeSel()}});
+$("tDone").addEventListener("click",function(){W.sel=-1;renderBoard()});
+$("modeSwitch").addEventListener("click",function(e){
+  var sb=e.target.closest(".segb");if(!sb||sb.dataset.mode===state.mode)return;
+  if(state.mode==="words"){
+    var t=attemptText();state.mode="type";save();
+    if(t){$("typer").value=t;G.usedCopy=true;updateCount();$("liveWpm").textContent="⌨️ No typing score this round"}
+  }else{
+    var s=$("typer").value.trim();state.mode="words";save();
+    W.asText=false;W.tiles=splitTiles(s||lastText());W.sel=-1;setAsText(false);
+  }
+  applyMode(true);
+});
+/* drag and drop with pointer events (mouse, touch and pen) */
+var D=null;
+$("board").addEventListener("pointerdown",function(e){
+  var el=e.target.closest(".tile");
+  if(!el||$("wordArea").classList.contains("locked"))return;
+  if(e.pointerType==="mouse"&&e.button!==0)return;
+  D={i:+el.dataset.i,el:el,x:e.clientX,y:e.clientY,drag:false,ghost:null,ins:null};
+  try{el.setPointerCapture(e.pointerId)}catch(_){}
+});
+$("board").addEventListener("pointermove",function(e){
+  if(!D)return;
+  if(!D.drag){
+    if(Math.hypot(e.clientX-D.x,e.clientY-D.y)<6)return;
+    D.drag=true;D.ghost=D.el.cloneNode(true);D.ghost.classList.add("drag-ghost");D.ghost.classList.remove("sel");
+    D.ghost.style.setProperty("--rc","var(--r"+G.round+")");
+    document.body.appendChild(D.ghost);D.el.classList.add("lifting");
+  }
+  e.preventDefault();
+  D.ghost.style.left=e.clientX+"px";D.ghost.style.top=e.clientY+"px";
+  var els=[].slice.call($("board").querySelectorAll(".tile"));
+  els.forEach(function(x){x.classList.remove("ins","ins-after")});
+  var idx=els.length;
+  for(var k=0;k<els.length;k++){
+    var r=els[k].getBoundingClientRect();
+    if(e.clientY<r.top||(e.clientY<=r.bottom&&e.clientX<r.left+r.width/2)){idx=k;break}
+  }
+  D.ins=idx;
+  if(idx<els.length)els[idx].classList.add("ins");else if(els.length)els[els.length-1].classList.add("ins-after");
+});
+function endDrag(cancel){
+  if(!D)return;var d=D;D=null;
+  if(d.ghost)d.ghost.remove();
+  if(!d.drag){if(!cancel){W.sel=(W.sel===d.i?-1:d.i);renderBoard()}return}
+  if(!cancel&&d.ins!==null){var t=W.tiles.splice(d.i,1)[0];var to=d.ins>d.i?d.ins-1:d.ins;W.tiles.splice(to,0,t);W.sel=-1}
+  renderBoard();
+}
+$("board").addEventListener("pointerup",function(){endDrag(false)});
+$("board").addEventListener("pointercancel",function(){endDrag(true)});
+$("board").addEventListener("click",function(e){
+  if(e.detail!==0)return; /* keyboard activation only; pointer taps handled above */
+  var el=e.target.closest(".tile");if(!el)return;
+  var i=+el.dataset.i;W.sel=(W.sel===i?-1:i);renderBoard();
+  var n=$("board").querySelector('.tile[data-i="'+i+'"]');if(n)n.focus();
+});
+
+/* ---------- finish ---------- */
+function recordFinished(){
+  if(G.saved)return;G.saved=true;
+  wgStreak();
+  G.entry={date:new Date().toISOString(),stars:G.stars,custom:G.idx<0,g:(G.gWords||[]).slice(),v:G.versions.map(function(v){return {t:v.text,c:v.colors}})};
+  state.history.unshift(G.entry);
+  if(G.idx>-1){var k=state.shown.indexOf(G.idx);if(k>-1)state.shown.splice(k,1);fillShown()}
+  award("first",G.newBadges);
+  if(state.history.length>=6)award("allsix",G.newBadges);
+  if(state.next>=BANK.length&&!state.shown.length)award("all30",G.newBadges);
+  save();refreshTop();
+}
+function finishSentence(){
+  recordFinished();
+  $("finTitle").textContent=(state.name?"Glowed up, "+state.name+"!":"Glowed up!");
+  var avg=G.wpms.length?Math.round(G.wpms.reduce(function(a,b){return a+b},0)/G.wpms.length):null;
+  $("finStats").textContent="You earned "+G.stars+" stars on this sentence"+(avg!==null?" and typed at about "+avg+" words per minute.":".")+" Level: "+levelInfo(state.stars).name+"."+(G.gWords&&G.gWords.length?" Gremlin words used: "+G.gWords.join(", ")+".":"");
+  $("legend").innerHTML=ROUNDS.map(function(r,i){return '<mark class="r'+(i+1)+'">'+esc(r.name)+"</mark>"}).join("");
+  var labels=["Basic sentence","Round 1","Round 2","Round 3","Round 4","Round 5"];
+  $("ladder").innerHTML=G.versions.map(function(v,i){return '<li><span class="lbl">'+labels[i]+"</span>"+render(v)+"</li>"}).join("");
+  $("newBadgesBox").hidden=!G.newBadges.length;
+  $("newBadges").innerHTML=G.newBadges.map(function(id){return badgeHtml(BADGES.find(function(b){return b.id===id}))}).join("");
+  show("finish");confetti();
+}
+$("finSpeak").addEventListener("click",function(){speak(G.versions[G.versions.length-1].text)});
+$("finCopy").addEventListener("click",function(){copyText(fmtEntry(G.entry,true))});
+
+/* ---------- finished list ---------- */
+var LBL=["Basic sentence","Round 1 \u2013 adjectives","Round 2 \u2013 preposition","Round 3 \u2013 fronted adverbial","Round 4 \u2013 conjunction","Round 5 \u2013 freestyle"];
+var pendingHist=-1;
+function fmtDate(iso,long){try{return new Date(iso).toLocaleDateString("en-GB",long?{day:"numeric",month:"long",year:"numeric"}:{day:"numeric",month:"short"})}catch(e){return ""}}
+function fmtEntry(en,head){
+  var s=en.v.map(function(v,i){return LBL[i]+": "+v.t}).join("\n");
+  return (head?"Sentence Glow-Up"+(state.name?" \u2013 "+state.name:"")+" \u2013 ":"")+fmtDate(en.date,true)+"\n"+s;
+}
+function renderHistory(){
+  var H=state.history;
+  $("histHead").textContent="My finished sentences"+(H.length?" ("+H.length+")":"");
+  $("histEmpty").hidden=!!H.length;$("copyAll").hidden=!H.length;$("histClearRow").hidden=!H.length;$("histConfirm").hidden=true;
+  $("copyBox").hidden=true;$("copyBoxHelp").hidden=true;
+  var canShare=!!navigator.share;
+  $("hist").innerHTML=H.map(function(en,k){
+    var last=en.v[en.v.length-1];
+    var lis=en.v.map(function(v,i){return '<li><span class="lbl">'+esc(LBL[i])+"</span>"+render({tokens:toks(v.t),colors:v.c||[]})+"</li>"}).join("");
+    var tools=pendingHist===k
+      ?'<strong>Delete this one?</strong><button class="btn small" data-hyes="'+k+'">Yes, delete</button><button class="btn ghost small" data-hno="1">Cancel</button>'
+      :'<button class="btn ghost small" data-hcopy="'+k+'">📋 Copy</button>'+(canShare?'<button class="btn ghost small" data-hshare="'+k+'">📤 Share</button>':"")+'<button class="btn ghost small" data-hdel="'+k+'">🗑 Delete</button>';
+    return '<details class="hitem"'+(pendingHist===k?" open":"")+'><summary><span class="hd">'+esc(fmtDate(en.date))+(en.custom?" \u00b7 own sentence":"")+" \u00b7 "+en.stars+' \u2b50</span><span class="hf">'+esc(last.t)+'</span></summary><ol class="ladder">'+lis+'</ol><div class="row" style="margin-top:.6rem">'+tools+"</div></details>";
+  }).join("");
+}
+function showCopyBox(text){
+  if($("home").hidden){renderHome();show("home")}
+  var box=$("copyBox");box.hidden=false;$("copyBoxHelp").hidden=false;box.value=text;
+  box.scrollIntoView({block:"center"});box.focus();box.select();
+}
+function copyText(text){
+  function fallback(){
+    var ok=false;
+    try{var t=document.createElement("textarea");t.value=text;t.setAttribute("readonly","");t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();ok=document.execCommand("copy");t.remove()}catch(e){}
+    if(ok)toast("Copied! Paste it into any app.");else showCopyBox(text);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){toast("Copied! Paste it into any app.")},fallback);
+  }else fallback();
+}
+$("hist").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  var H=state.history,d=b.dataset;
+  if(d.hcopy){copyText(fmtEntry(H[+d.hcopy],true));return}
+  if(d.hshare){navigator.share({title:"Sentence Glow-Up",text:fmtEntry(H[+d.hshare],true)}).catch(function(){});return}
+  if(d.hdel){pendingHist=+d.hdel;renderHistory();return}
+  if(d.hno){pendingHist=-1;renderHistory();return}
+  if(d.hyes){H.splice(+d.hyes,1);pendingHist=-1;save();renderHistory();toast("Deleted");return}
+});
+$("copyAll").addEventListener("click",function(){
+  copyText("Sentence Glow-Up"+(state.name?" \u2013 "+state.name:"")+"\n\n"+state.history.map(function(en){return fmtEntry(en,false)}).join("\n\n"));
+});
+$("histClear").addEventListener("click",function(){$("histClearRow").hidden=true;$("histConfirm").hidden=false});
+$("histNo").addEventListener("click",function(){$("histClearRow").hidden=false;$("histConfirm").hidden=true});
+$("histYes").addEventListener("click",function(){state.history=[];save();renderHistory();toast("Finished list cleared")});
+$("againBtn").addEventListener("click",function(){renderHome();show("home")});
+
+/* ---------- player settings + reset ---------- */
+function refreshSettings(){
+  $("renameIn").value="";$("renameIn").placeholder=state.name?"Playing now: "+state.name:"Type a name";
+  var others=Object.keys(store.players).filter(function(n){return n&&n!==state.name});
+  $("playerList").innerHTML=others.map(function(n){return '<button type="button" class="chip add" data-n="'+esc(n)+'">👤 '+esc(n)+"</button>"}).join("");
+  $("resetInfo").textContent="This clears "+(state.name?state.name+"'s ":"")+state.stars+" stars, "+state.badges.length+" badges and typing record, and starts the 30 sentences again from the beginning. The finished-sentences list is kept.";
+  $("resetAsk").hidden=false;$("resetConfirm").hidden=true;
+  var all=Object.keys(store.players).filter(Boolean);
+  $("delList").innerHTML=all.length?all.map(function(n){return '<button type="button" class="chip add" data-del="'+esc(n)+'">🗑 '+esc(n)+(n===state.name?" (playing now)":"")+"</button>"}).join(""):'<span class="muted">No players yet.</span>';
+  $("delConfirm").hidden=true;pendingDel=null;
+}
+function switchPlayer(n){
+  n=n.trim();if(!n)return;
+  if(n===state.name){toast(n+" is already playing");return}
+  var existed=!!store.players[n];
+  save();loadPlayer(n);save();renderHome();$("settings").hidden=false;refreshSettings();
+  toast(existed?"Welcome back, "+n+"!":"New player: "+n+". Fresh start!");
+}
+function openSettings(){
+  renderHome();show("home");
+  $("settings").hidden=false;refreshSettings();
+  $("renameIn").focus();
+}
+$("resetBtn").addEventListener("click",openSettings);
+$("openSettings").addEventListener("click",openSettings);
+$("settingsClose").addEventListener("click",function(){$("settings").hidden=true});
+$("renameBtn").addEventListener("click",function(){switchPlayer($("renameIn").value)});
+$("playerList").addEventListener("click",function(e){var b=e.target.closest("[data-n]");if(b)switchPlayer(b.dataset.n)});
+var pendingDel=null;
+$("delList").addEventListener("click",function(e){
+  var b=e.target.closest("[data-del]");if(!b)return;
+  pendingDel=b.dataset.del;
+  $("delAsk").textContent="Delete "+pendingDel+" and all their progress?";
+  $("delConfirm").hidden=false;
+});
+$("delNo").addEventListener("click",function(){pendingDel=null;$("delConfirm").hidden=true});
+$("delYes").addEventListener("click",function(){
+  var n=pendingDel;if(!n)return;
+  delete store.players[n];
+  var msg="Deleted "+n;
+  if(n===state.name){
+    var others=Object.keys(store.players).filter(Boolean);
+    if(others.length){loadPlayer(others[0]);msg+=". Now playing: "+others[0]}
+    else{store.players={};loadPlayer("");msg+=". Type a name to start a new player"}
+  }
+  save();renderHome();$("settings").hidden=false;refreshSettings();
+  toast(msg);
+});
+$("renameIn").addEventListener("keydown",function(e){if(e.key==="Enter")$("renameBtn").click()});
+$("resetStart").addEventListener("click",function(){$("resetAsk").hidden=true;$("resetConfirm").hidden=false});
+$("resetNo").addEventListener("click",function(){$("resetAsk").hidden=false;$("resetConfirm").hidden=true});
+$("resetYes").addEventListener("click",function(){
+  state={name:state.name,stars:0,bestWpm:0,badges:[],powers:0,mode:state.mode||"type",shown:[],next:0,history:state.history};fillShown();
+  save();renderHome();
+  $("settings").hidden=false;$("resetAsk").hidden=false;$("resetConfirm").hidden=true;
+  $("resetInfo").textContent="All stars and badges have been cleared.";
+  toast("All stars and badges cleared");
+});
+
+/* ---------- confetti ---------- */
+function confetti(){
+  if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  var cv=$("confetti"),ctx=cv.getContext("2d");if(!ctx)return;
+  cv.width=innerWidth;cv.height=innerHeight;
+  var cs=getComputedStyle(document.documentElement);
+  var cols=["--r1","--r2","--r3","--r4","--r5"].map(function(v){return cs.getPropertyValue(v).trim()||"#888"});
+  var ps=[];for(var i=0;i<140;i++)ps.push({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,r:Math.random()*6.28,s:6+Math.random()*6,c:cols[i%5]});
+  var t0=performance.now();
+  (function f(t){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ps.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.r+=.1;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);ctx.restore()});
+    if(t-t0<3200)requestAnimationFrame(f);else ctx.clearRect(0,0,cv.width,cv.height);
+  })(t0);
+}
+
+const Y_CONS = ['cry', 'dry', 'try', 'fry', 'spy', 'carry', 'hurry', 'worry', 'copy', 'marry', 'bury', 'study', 'empty', 'deny', 'reply', 'apply', 'rely', 'supply', 'envy', 'multiply', 'tidy', 'pity'];
+const Y_VOW = ['play', 'stay', 'enjoy', 'obey', 'destroy', 'delay', 'annoy', 'pray', 'spray', 'employ', 'sway'];
+const ED = {
+  plain: ['jump', 'walk', 'look', 'help', 'crash', 'laugh', 'rain', 'kick', 'wish', 'paint', 'climb', 'shout', 'visit', 'open', 'happen', 'enter', 'offer', 'order', 'listen', 'gather', 'answer', 'remember', 'garden', 'fix', 'mix', 'relax', 'snow', 'show', 'allow'],
+  e: ['bake', 'smile', 'hope', 'dance', 'decide', 'arrive', 'change', 'chase', 'invite', 'like', 'rescue', 'believe', 'scare', 'wave', 'close', 'share', 'tape', 'race'],
+  dbl: ['stop', 'hop', 'plan', 'drop', 'clap', 'grab', 'skip', 'rob', 'chat', 'beg', 'nod', 'shop', 'slip', 'trip', 'hug', 'jog', 'tap', 'wag', 'admit', 'prefer', 'occur', 'refer', 'regret'],
+  ukl: ['travel', 'cancel', 'label', 'marvel', 'signal', 'quarrel', 'level', 'model'],
+  y: ['cry', 'carry', 'hurry', 'worry', 'copy', 'study', 'reply', 'tidy', 'play', 'enjoy', 'stay', 'destroy']
+};
+const CIOUS = [
+  { w: 'spacious', root: 'space', clue: 'having lots of room' }, { w: 'gracious', root: 'grace', clue: 'kind and polite' },
+  { w: 'vicious', root: 'vice', clue: 'fierce and cruel' }, { w: 'malicious', root: 'malice', clue: 'meaning to cause harm' },
+  { w: 'suspicious', root: 'suspicion', clue: 'not trusting someone' }, { w: 'precious', clue: 'worth a lot; much loved' },
+  { w: 'delicious', clue: 'tasting very good' }, { w: 'conscious', clue: 'awake and aware', note: 'Watch the <b>sc</b>: con-<b>sc</b>ious.' },
+  { w: 'ferocious', clue: 'fierce and wild' }, { w: 'atrocious', clue: 'very bad' },
+  { w: 'ambitious', root: 'ambition', clue: 'wanting to succeed' }, { w: 'cautious', root: 'caution', clue: 'careful to avoid danger' },
+  { w: 'fictitious', root: 'fiction', clue: 'made up, not real' }, { w: 'infectious', root: 'infection', clue: 'easily spread' },
+  { w: 'nutritious', root: 'nutrition', clue: 'full of goodness to eat' }, { w: 'superstitious', root: 'superstition', clue: 'believing in luck and omens' },
+  { w: 'anxious', clue: 'worried', note: 'The odd one out: <b>anxious</b> ends in <b>-xious</b>.' }
+];
+// Short child-friendly meanings, used as clues in Sentence Glow-Up gremlin challenges (spelling never shown).
+const MEANINGS = {
+accommodate:"give someone a place to stay",accompany:"go somewhere with someone",according:"as said by (“___ to the map…”)",achieve:"succeed in doing something",
+aggressive:"ready to attack or fight",amateur:"someone who does something for fun, not as a job",ancient:"very, very old",apparent:"clear or easy to see",
+appreciate:"be thankful for something",attached:"fixed or joined to something",available:"free to be used or bought",average:"normal or typical",
+awkward:"clumsy or uncomfortable",bargain:"something bought cheaply",bruise:"a purple mark on the skin after a knock",category:"a group of things that are alike",
+cemetery:"a place where people are buried",committee:"a group chosen to make decisions",communicate:"share information with others",community:"the people living in one area",
+competition:"a contest to find a winner",conscience:"the inner voice that tells you right from wrong",conscious:"awake and aware",controversy:"a big public disagreement",
+convenience:"something that makes life easier",correspond:"write letters to each other",criticise:"point out what is wrong with something",curiosity:"wanting to find things out",
+definite:"certain; sure",desperate:"in great need, willing to try anything",determined:"not giving up",develop:"grow or change over time",
+dictionary:"a book of word meanings",disastrous:"terribly bad",embarrass:"make someone feel awkward or silly",environment:"the natural world around us",
+equip:"give someone the things they need",especially:"more than usual; particularly",exaggerate:"make something sound bigger than it is",excellent:"very good indeed",
+existence:"being real or alive",explanation:"words that make something clear",familiar:"well known to you",foreign:"from another country",
+forty:"the number 40",frequently:"often",government:"the people who run a country",guarantee:"a firm promise",
+harass:"keep bothering or pestering someone",hindrance:"something that gets in the way",identity:"who someone is",immediate:"happening straight away",
+individual:"a single person",interfere:"get involved where you're not wanted",interrupt:"stop someone while they are speaking",language:"the words people speak and write",
+leisure:"free time to relax",lightning:"a flash of light in a storm",marvellous:"wonderful",mischievous:"playfully naughty",
+muscle:"a body part that helps you move",necessary:"needed",neighbour:"someone who lives next door",nuisance:"an annoying person or thing",
+occupy:"fill or take up a space",occur:"happen",opportunity:"a chance to do something",parliament:"the place where a country's laws are made",
+persuade:"talk someone into something",physical:"to do with the body",prejudice:"an unfair opinion formed without knowing the facts",privilege:"a special right or advantage",
+profession:"a job that needs special training",programme:"a show on TV or radio",pronunciation:"the way a word is said",queue:"a line of people waiting",
+recognise:"know someone or something from before",recommend:"suggest that something is good",relevant:"connected to what is being talked about",restaurant:"a place to buy and eat meals",
+rhyme:"words that end with the same sound",rhythm:"a regular beat",sacrifice:"give something up for something else",secretary:"a person who looks after letters and records",
+shoulder:"where your arm joins your body",signature:"your name, written by you",sincere:"honest; meaning what you say",soldier:"a member of an army",
+stomach:"where food goes after you swallow",sufficient:"enough",suggest:"put forward an idea",symbol:"a sign that stands for something",
+system:"a set of parts working together",temperature:"how hot or cold something is",thorough:"careful and complete",twelfth:"number 12 in a list",
+variety:"lots of different kinds",vegetable:"a plant you eat, like a carrot",vehicle:"a car, bus, lorry or van",yacht:"a sailing boat"
+};
+/* ---------- Word Gremlins link: challenges + spelling bonuses ---------- */
+var WGK="wordgremlins.v1",WGC="wordgremlins.catalog";
+function wgToday(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function wgRead(){try{var s=JSON.parse(localStorage.getItem(WGK)||"null"),c=JSON.parse(localStorage.getItem(WGC)||"null");return s&&c?{s:s,c:c}:null}catch(e){return null}}
+function wgUpdate(fn){try{var raw=localStorage.getItem(WGK);if(!raw)return;var s=JSON.parse(raw);fn(s);localStorage.setItem(WGK,JSON.stringify(s))}catch(e){}}
+function wgDayDiff(a,b){return Math.round((new Date(b+"T00:00")-new Date(a+"T00:00"))/864e5)}
+/* forms of a word that count as using it: necessary, necessarily, suggested, bruises, categories... */
+function wgForms(w){
+  var f=[w,w+"s",w+"es",w+"ed",w+"d",w+"ing",w+"ly",w+"er",w+"ers",w+"ment",w+"ments"],last=w.slice(-1);
+  if(/e$/.test(w))f.push(w.slice(0,-1)+"ing",w.slice(0,-1)+"y");
+  if(/[^aeiou]y$/.test(w))f.push(w.slice(0,-1)+"ies",w.slice(0,-1)+"ied",w.slice(0,-1)+"ily");
+  if(/[^aeiou][aeiou][bdgklmnprt]$/.test(w))f.push(w+last+"ed",w+last+"ing",w+last+"ence");
+  if(/ent$/.test(w))f.push(w.slice(0,-1)+"ce");
+  return f;
+}
+function wgDist(a,b){ /* Damerau-Levenshtein (adjacent swaps count as 1) */
+  var n=a.length,m=b.length,d=[],i,j;for(i=0;i<=n;i++){d.push([i]);for(j=1;j<=m;j++)d[i].push(i?0:j)}
+  for(i=1;i<=n;i++)for(j=1;j<=m;j++){var c=a[i-1]===b[j-1]?0:1;d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+c);if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1])d[i][j]=Math.min(d[i][j],d[i-2][j-2]+1)}
+  return d[n][m];
+}
+function wgNear(t,w){
+  if(t.length<4||t[0]!==w[0])return false;
+  var lim=w.length<=6?1:2;
+  return wgForms(w).some(function(f){return Math.abs(f.length-t.length)<=lim&&wgDist(t,f)<=lim});
+}
+/* rule lists (shared with the Spelling Lab) */
+var RULE_GOOD={},RULE_BAD={};
+(function(){
+  function form(cat,b){return cat==="e"?b+"d":cat==="dbl"?b+b.slice(-1)+"ed":cat==="ukl"?b+"led":/[^aeiou]y$/.test(b)?b.slice(0,-1)+"ied":b+"ed"}
+  var good={};
+  Object.keys(ED).forEach(function(cat){ED[cat].forEach(function(b){good[form(cat,b)]={b:b,cat:cat}})});
+  Y_CONS.forEach(function(b){good[b.slice(0,-1)+"ied"]={b:b,cat:"y"}});Y_VOW.forEach(function(b){good[b+"ed"]={b:b,cat:"plain"}});
+  Object.keys(good).forEach(function(f){var g=good[f];if(g.cat==="dbl"||g.cat==="ukl"||g.cat==="y")RULE_GOOD[f]={kind:g.cat==="y"?"y":"ed",b:g.b}});
+  Object.keys(good).forEach(function(f){
+    var b=good[f].b;
+    [b+"ed",b+"d",b+b.slice(-1)+"ed",b.slice(0,-1)+"ied",b.slice(0,-1)+"ed",/e$/.test(b)?b+"ed":null,/l$/.test(b)?b+"ed":null].forEach(function(x){
+      if(x&&x!==f&&!good[x]&&!(/ied$/.test(x)&&!/y$/.test(b)))RULE_BAD[x]={right:f,b:b};
+    });
+  });
+  CIOUS.forEach(function(it){RULE_GOOD[it.w]={kind:"cious"}});
+})();
+var HOMOS={there:1,their:1,"they're":1,your:1,"you're":1,its:1,"it's":1,of:1,off:1,to:1,too:1,two:1};
+
+function wgPool(){
+  var d=wgRead();if(!d)return null;
+  var t=wgToday();
+  return d.c.map(function(x){var p=d.s.words[x.w]||{};return {w:x.w,e:x.e,h:x.h,i:x.i,p:p,ok:x.i<d.s.unlocked||p.mastered||p.flash}}).filter(function(x){return x.w&&x.ok});
+}
+function wgPick(exclude){
+  var pool=wgPool();if(!pool||!pool.length)return [];
+  exclude=exclude||[];pool=pool.filter(function(x){return exclude.indexOf(x.w)<0});
+  var sh=function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a};
+  var tamed=sh(pool.filter(function(x){return x.p.mastered})).sort(function(a,b){return (a.p.lastSeen||"").localeCompare(b.p.lastSeen||"")});
+  var training=sh(pool.filter(function(x){return !x.p.mastered}));
+  var out=[].concat(training.slice(0,1),tamed.slice(0,2));
+  sh(pool).forEach(function(x){if(out.length<3&&out.indexOf(x)<0)out.push(x)});
+  return sh(out.slice(0,3)).map(function(x){return {w:x.w,e:x.e,clue:MEANINGS[x.w]||x.h||"",tamed:!!x.p.mastered,done:false,tried:false}});
+}
+function chClue(ch){return ch.clue?esc(ch.clue):"Starts with <b>"+esc(ch.w[0])+"</b>, "+ch.w.length+" letters"}
+function renderChallenges(){
+  var box=$("gremBox");if(!box)return;
+  if(!G||!G.ch||!G.ch.length){box.hidden=true;return}
+  box.hidden=false;
+  $("gremCards").innerHTML=G.ch.map(function(ch,k){
+    return '<div class="gcard'+(ch.done?" gdone":"")+'"><span class="ge">'+ch.e+'</span><span class="gt">'+(ch.done?"<b>"+esc(ch.w)+"</b> ✔":chClue(ch)+(ch.tried?' <span class="gtry">(nearly!)</span>':""))+'</span>'+(ch.done?"":'<button type="button" class="btn ghost small" data-say="'+k+'" aria-label="Hear the word">🔊</button>')+"</div>";
+  }).join("");
+}
+function gremSetup(){
+  G.ch=wgPick();G.gUsed={};G.gWords=[];
+  renderChallenges();
+}
+/* called from finishRound: returns {lines:[[label,pts]], notes:[html]} */
+function gremCheck(c){
+  var out={lines:[],notes:[]};if(!G||!G.gUsed)return out;
+  var d=wgRead(),cat=d?d.c:[],bankWords={},t=wgToday();
+  ROUNDS.forEach(function(R){R.bank.forEach(function(b){bankWords[b.toLowerCase()]=1})});
+  var homo=null;
+  c.addedIdx.forEach(function(i){
+    var tok=c.newNorms[i];if(!tok||G.gUsed[tok])return;
+    if(HOMOS[tok]&&!homo)homo=tok;
+    /* 1. a gremlin word spelled right */
+    var hit=null;
+    for(var k=0;k<cat.length&&!hit;k++){if(wgForms(cat[k].w).indexOf(tok)>-1)hit=cat[k]}
+    if(hit&&!G.gUsed[hit.w]){
+      G.gUsed[tok]=1;G.gUsed[hit.w]=1;
+      if(state.mode==="words"&&bankWords[tok])return; /* tapped from the word bank, so not spelled from memory */
+      var ch=(G.ch||[]).find(function(x){return x.w===hit.w});
+      var p=d.s.words[hit.w]||{};
+      if(ch){ch.done=true;out.lines.push(["🎯 Gremlin challenge: "+tok,5])}
+      else out.lines.push(["👾 Gremlin word, all by yourself: "+tok,8]);
+      G.gWords.push(hit.w);
+      if(p.mastered){wgUpdate(function(s){var q=s.words[hit.w];if(q&&q.mastered)q.lastSeen=t});out.notes.push(hit.e+" <b>"+esc(hit.w)+"</b> is still tamed. That counts as a check-up!")}
+      return;
+    }
+    /* 2. nearly a challenge word */
+    var near=(G.ch||[]).find(function(x){return !x.done&&wgNear(tok,x.w)});
+    if(near){
+      G.gUsed[tok]=1;near.tried=true;
+      out.lines.push(["🎯 Good try at a gremlin word",1]);
+      out.notes.push(near.e+' You wrote <span class="gbad">'+esc(tok)+'</span>. The gremlin word is spelled <b>'+esc(near.w)+"</b>. "+(near.tamed?"We'll check it again soon in Word Gremlins.":"Keep training it in Word Gremlins.")+" You can still fix it in a later round.");
+      wgUpdate(function(s){var q=s.words[near.w];if(!q)return;q.misses=(q.misses||0)+1;if(q.mastered)q.lastSeen=""});
+      return;
+    }
+    /* 3. Spelling Lab rule words */
+    var g=RULE_GOOD[tok];
+    if(g){G.gUsed[tok]=1;out.lines.push([(g.kind==="y"?"🦎 y → ied rule: ":g.kind==="cious"?"🦑 -cious/-tious word: ":"🐊 -ed rule: ")+tok,3]);return}
+    var bad=RULE_BAD[tok];
+    if(bad){G.gUsed[tok]=1;out.notes.push('🐊 Rule check: you wrote <span class="gbad">'+esc(tok)+'</span>. With the -ed rule, '+esc(bad.b)+" becomes <b>"+esc(bad.right)+"</b>.");return}
+    var cn=CIOUS.find(function(it){return tok!==it.w&&/ious$/.test(tok)&&(wgDist(tok,it.w)<=1||tok.replace(/tious$/,"cious")===it.w||tok.replace(/cious$/,"tious")===it.w)});
+    if(cn){G.gUsed[tok]=1;out.notes.push('🦑 Rule check: you wrote <span class="gbad">'+esc(tok)+'</span>. It’s spelled <b>'+esc(cn.w)+"</b>.")}
+  });
+  if(homo)out.notes.push("🦉 You used <b>"+esc(homo)+"</b>. Read your sentence again: is it the right one?");
+  renderChallenges();
+  return out;
+}
+function wgAddStars(n){if(n>0)wgUpdate(function(s){s.stars=(s.stars||0)+n})}
+function wgStreak(){wgUpdate(function(s){var t=wgToday(),last=s.streak&&s.streak.last;s.streak=s.streak||{last:"",count:0};if(last!==t){s.streak.count=last&&wgDayDiff(last,t)===1?s.streak.count+1:1;s.streak.last=t}})}
+document.addEventListener("click",function(e){
+  var b=e.target.closest("[data-say]");if(b&&G&&G.ch){speak(G.ch[+b.dataset.say].w)}
+  if(e.target.closest("#gremNew")&&G){var kept=(G.ch||[]).filter(function(x){return x.done||x.tried});G.ch=kept.concat(wgPick((G.ch||[]).map(function(x){return x.w}).concat(G.gWords||[])).slice(0,Math.max(0,3-kept.length)));renderChallenges()}
+});
+
+renderHome();
+})();
+</script>
+</body>
+</html>

@@ -22,7 +22,7 @@ h1{font-size:28px;margin:4px 0 2px}h2{font-size:22px;margin:12px 0}h3{margin:18p
 .gremlin .n{font-weight:800;font-size:15px;min-height:20px;word-break:break-all}.gremlin .q{color:var(--mute);letter-spacing:2px}
 .pips{letter-spacing:3px;color:var(--pri);font-size:14px}
 .shelf{grid-template-columns:repeat(4,1fr);gap:8px}.shelf .gremlin{min-height:76px;padding:6px 2px}.shelf .e{font-size:28px}.shelf .n{font-size:12px}
-.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:8px;background:var(--card);padding:8px 12px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;justify-content:center;gap:4px;background:var(--card);padding:8px 6px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
 .tabs button{flex:1;max-width:180px;border:0;background:transparent;font:inherit;font-weight:800;color:var(--mute);padding:8px;border-radius:12px;cursor:pointer}
 .tabs button.on{color:var(--pri);background:var(--bg)}
 .top{display:flex;align-items:center;gap:10px;justify-content:space-between}
@@ -63,6 +63,7 @@ input:focus,textarea:focus{outline:3px solid var(--pri2);border-color:transparen
 .rule p{margin:8px 0;line-height:1.5}.fb .rulenote{line-height:1.5;color:var(--ink);font-weight:500}
 .opts.small .opt{font-size:17px;padding:13px}
 .tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;padding:6px 4px}.tabs .ti{font-size:20px;line-height:1}
+.glowframe{position:fixed;top:0;left:0;width:100%;height:calc(100dvh - var(--tabh,62px));border:0;background:var(--bg);display:none}
 details{margin:12px 0}summary{cursor:pointer;font-weight:800;color:var(--pri)}
 .fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9}.fx span{position:absolute;top:-30px;font-size:26px;opacity:.9;animation:fall 1.8s ease-in forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(360deg);opacity:.9}}
