@@ -9,9 +9,9 @@ know them.
 **Flashcard words** (Settings): type, paste or upload words already learned with
 flashcards. They count as tamed and join the daily check-ups.
 
-**Spelling Lab** (🧪 Lab tab): rule gremlins for word endings (y → ied, -ed endings,
+**Lab** (🧪 Lab tab): rule gremlins for word endings (y → ied, -ed endings,
 -cious/-tious) and homophones (there/their/they're, your/you're, of/off, to/too/two,
-its/it's). Score 7/8 on 3 different days to tame a rule; tamed rules get check-ups.
+its/it's), punctuation (commas in lists, commas after openers, commas for extra information, inverted commas, apostrophes) and grammar (word classes). Score 7/8 on 3 different days to tame a rule; tamed rules get check-ups.
 
 **Sentences** (✨ tab): Sentence Glow-Up, built in. Each sentence offers 3 gremlin challenges (shown by meaning and sound, never spelling). Gremlin words spelled right earn bonus stars, and a tamed word used correctly counts as a check-up. -ed and -cious/-tious words are checked against the Lab rules.
 
@@ -34,5 +34,5 @@ Plain HTML/CSS/JS. No build step, no dependencies. Works offline once installed.
 
 - Progress is stored on each device (localStorage). To move it: Settings → *Copy backup*, then paste on the other device and tap *Restore*.
 - Use your own words: Settings → *Your own word list*. Optional `[brackets]` mark tricky letters, `|text` adds a hint.
-- Updating: change the files, and bump `CACHE` in `sw.js` (currently `wordgremlins-v3`) so installed copies refresh.
+- Updating: change the files, and bump `CACHE` in `sw.js` (currently `wordgremlins-v4`) so installed copies refresh.
 - Tip: switch off predictive text/autocorrect on the keyboard for best results (the app asks the browser not to offer suggestions, but some keyboards ignore that).

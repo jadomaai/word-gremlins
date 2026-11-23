@@ -127,7 +127,7 @@ function home() {
    <h3>This batch</h3><div class="grid">${tiles.map(gremlinTile).join('')}</div>
    <p class="mute center" style="margin:8px 0 0">●●● = 3 days correct = tamed</p>
    ${cta}
-   ${(() => { const due = rulesDue(); return due.length ? `<button class="btn" data-go="lab">👻 Spelling Lab: ${due.length} rule check-up${due.length > 1 ? 's' : ''} due</button>` : `<button class="btn" data-go="lab">🧪 Spelling Lab: word endings &amp; homophones</button>`; })()}
+   ${(() => { const due = rulesDue(); return due.length ? `<button class="btn" data-go="lab">👻 Lab: ${due.length} rule check-up${due.length > 1 ? 's' : ''} due</button>` : `<button class="btn" data-go="lab">🧪 Lab: spelling, punctuation &amp; grammar</button>`; })()}
    <details class="card"><summary>How it works</summary>
     <p>Each gremlin is a word. Train it through four rounds: <b>peek &amp; build</b>, <b>ghost letters</b>, <b>spot the saboteur</b>, and <b>listen &amp; write</b>.</p>
     <p>Spell it right from memory on <b>3 different days</b> and it's tamed. Tame the whole batch, beat the boss, and the next batch unlocks. Tamed gremlins sometimes ambush you later to check you still know them!</p><p>In <b>✨ Sentences</b>, use gremlin words in your own sentences, spelled from memory, for bonus stars. A tamed word spelled right there counts as a check-up.</p><p>Words learned with <b>flashcards</b> can be added in Settings. They count as tamed and join the check-ups.</p></details>`, 'home');
@@ -139,7 +139,7 @@ function shelf() {
   const rulesTamed = PACKS.filter(p => RP(p.id).mastered);
   shell(`<h1>Trophy shelf</h1><p class="sub">${masteredCount()} of ${LIST.length} gremlins tamed. Tap a tamed one to hear it. 🃏 = tamed with flashcards.</p>
    <div class="grid shelf">${LIST.map((w, i) => { const p = P(w); return p.mastered ? `<div class="gremlin" data-say="${esc(w.word)}"><div class="e">${w.emoji}</div><div class="n">${esc(w.word)}</div>${p.flash ? '<div class="pips">🃏</div>' : ''}</div>` : `<div class="gremlin"><div class="e egg">${i < S.unlocked ? w.emoji : '🥚'}</div><div class="n"><span class="q">?</span></div></div>`; }).join('')}</div>
-   <h3>Rule gremlins</h3><p class="sub">${rulesTamed.length} of ${PACKS.length} rules tamed in the Spelling Lab.</p>
+   <h3>Rule gremlins</h3><p class="sub">${rulesTamed.length} of ${PACKS.length} rules tamed in the Lab.</p>
    <div class="grid shelf">${PACKS.map(p => RP(p.id).mastered ? `<div class="gremlin"><div class="e">${p.emoji}</div><div class="n" style="word-break:normal">${esc(p.name)}</div></div>` : `<div class="gremlin"><div class="e egg">${p.emoji}</div><div class="n"><span class="q">?</span></div></div>`).join('')}</div>`, 'shelf');
   app.querySelectorAll('[data-say]').forEach(e => e.onclick = () => speak(e.dataset.say));
 }
@@ -595,6 +595,133 @@ const PACKS = [
   { id: 'its', group: 'Homophones', name: 'its · it\'s', emoji: '🐢', eg: 'It\'s wagging its tail.', gen: (lv) => homoQ('its', rnd(10) < 2 + lv * 2), intro: () => tipsIntro('its') }
 ];
 function tipsIntro(k) { return Object.values(HOMO[k].tips).map(t => `<p>${t}</p>`).join(''); }
+/* ---------- punctuation & grammar gremlins ---------- */
+const P_LIST = [
+  'We need eggs^ flour^ sugar and butter for the cake.', 'I packed a torch^ a map^ some snacks and a warm coat.', 'The flag was red^ white and blue.',
+  'Tom^ Priya^ Leo and Grace sat at the front.', 'At the zoo we saw lions^ zebras^ penguins and a giraffe.', 'She ran^ jumped^ skipped and danced across the playground.',
+  'My favourite fruits are mangoes^ grapes and strawberries.', 'The old house was dark^ dusty^ cold and silent.', 'Bring your swimming costume^ a towel and some goggles.',
+  'We visited Paris^ Rome^ Madrid and Lisbon.', 'For breakfast I had toast^ yoghurt and orange juice.', 'The dragon was huge^ scaly and terrifying.'
+];
+const P_FRONT = [
+  'After lunch^ we played football.', 'Slowly^ the tortoise crossed the road.', 'In the middle of the night^ the dog began to bark.', 'Without a sound^ the cat crept closer.',
+  'As the sun set^ the sky turned pink.', 'Every Saturday^ we visit Grandma.', 'Before the match^ the players warmed up.', 'Carefully^ she lifted the lid.',
+  'Under the bridge^ a troll was waiting.', 'When the bell rang^ everyone rushed outside.', 'Later that day^ it started to snow.', 'With a loud crash^ the shelf fell down.'
+];
+const P_EXTRA = [
+  'My sister^ who loves horses^ rides every Saturday.', 'The cake^ which was still warm^ smelled delicious.', 'Mr Patel^ our head teacher^ gave a speech.',
+  'London^ the capital of England^ is very busy.', 'Our dog^ a scruffy terrier^ loves chasing squirrels.', 'The castle^ which was built long ago^ stood on a hill.',
+  'My best friend^ Ava^ lives next door.', 'The film^ although quite long^ was brilliant.', 'Jack^ who was very tired^ fell asleep on the sofa.', 'The river^ swollen with rain^ burst its banks.'
+];
+const P_SPEECH = [
+  ['Can we go to the park', '?', 'asked Mia', 'after'], ['I love this song', '!', 'shouted Sam', 'after'], ["It's time for bed", '.', 'said Dad', 'after'],
+  ['Where are my shoes', '?', 'asked Leo', 'after'], ['Watch out', '!', 'cried Grace', 'after'], ['The bus is late again', '.', 'sighed Mum', 'after'],
+  ["Let's build a den", '.', 'Priya said', 'before'], ['Is anyone there', '?', 'Tom whispered', 'before'], ['We won the match', '!', 'the captain cheered', 'before'],
+  ['Please close the door', '.', 'the teacher said', 'before'], ['I can see the sea', '!', 'yelled Ava', 'after'], ['Have you finished your homework', '?', 'asked Grandpa', 'after']
+];
+const P_APOS = [
+  ['The ___ tail was wagging.', "dog's", ['dogs'], 'One dog owns the tail, so add <b>\'s</b>: dog\'s.'],
+  ['All the ___ coats were on the pegs.', "children's", ["childrens'", 'childrens'], '<b>Children</b> is already plural without an s, so add <b>\'s</b>: children\'s.'],
+  ['The two ___ bikes were outside.', "girls'", ["girl's", 'girls'], 'More than one girl, and <b>girls</b> ends in s, so the apostrophe goes after the s: girls\'.'],
+  ['There are three ___ in the field.', 'horses', ["horse's", "horses'"], 'Just more than one horse, and nothing belongs to them, so no apostrophe.'],
+  ['I ___ find my pencil.', "can't", ['cant', "ca'nt"], '<b>can\'t</b> = cannot. The apostrophe goes where letters are missing.'],
+  ['___ going to be late!', "We're", ['Were', "Wer'e"], '<b>we\'re</b> = we are. The apostrophe replaces the <b>a</b>.'],
+  ['She ___ like spiders.', "doesn't", ["does'nt", 'doesnt'], '<b>doesn\'t</b> = does not. The apostrophe replaces the <b>o</b>.'],
+  ['The ___ hat blew away.', "teacher's", ['teachers', "teachers'"], 'One teacher owns the hat, so add <b>\'s</b>: teacher\'s.'],
+  ['The ___ changing room was messy.', "boys'", ["boy's", 'boys'], 'The changing room belongs to lots of boys, so the apostrophe goes after the s: boys\'.'],
+  ['I ___ been to Scotland.', "haven't", ["have'nt", 'havent'], '<b>haven\'t</b> = have not. The apostrophe replaces the <b>o</b>.'],
+  ['James ate three ___.', 'apples', ["apple's", "apples'"], 'Just more than one apple, so no apostrophe.'],
+  ['Both of my ___ cars are blue.', "parents'", ["parent's", 'parents'], 'Two parents, and <b>parents</b> ends in s, so the apostrophe goes after the s: parents\'.'],
+  ['The ___ whiskers twitched.', "mouse's", ['mouses', "mouses'"], 'One mouse owns the whiskers, so add <b>\'s</b>: mouse\'s.'],
+  ['___ raining again.', "It's", ['Its', "Its'"], '<b>it\'s</b> = it is.'],
+  ['The five ___ toys were everywhere.', "puppies'", ["puppy's", 'puppies'], 'Five puppies, and <b>puppies</b> ends in s, so the apostrophe goes after the s: puppies\'.'],
+  ['We ___ finished yet.', "haven't", ['havent', "havn't"], '<b>haven\'t</b> = have not.']
+];
+const WC_TIP = {
+  noun: 'A <b>noun</b> names a person, place, thing or idea (castle, brother, happiness).',
+  verb: 'A <b>verb</b> is a doing or being word (run, shouted, is).',
+  adjective: 'An <b>adjective</b> describes a noun (tiny, freezing, ancient).',
+  adverb: 'An <b>adverb</b> tells you how, when, where or how often something happens (slowly, tomorrow, often).',
+  preposition: 'A <b>preposition</b> shows where or when one thing is compared with another (under, across, before).',
+  conjunction: 'A <b>conjunction</b> joins words or clauses (and, because, although).',
+  pronoun: 'A <b>pronoun</b> stands in for a noun (she, them, yours).'
+};
+const P_WC = [
+  ['The [castle] stood on a hill.', 'noun'], ['My [brother] loves football.', 'noun'], ['We saw a [rainbow] after the storm.', 'noun'], ['The [happiness] on her face was clear.', 'noun'], ['Our [school] has a big field.', 'noun'],
+  ['The children [shouted] loudly.', 'verb'], ['She [is] my best friend.', 'verb'], ['Birds [fly] south in winter.', 'verb'], ['He [crept] up the stairs.', 'verb'], ['The dog [chewed] my slipper.', 'verb'],
+  ['The [tiny] mouse squeaked.', 'adjective'], ['It was a [freezing] morning.', 'adjective'], ['The soup tasted [delicious].', 'adjective'], ['We explored an [ancient] castle.', 'adjective'], ['The [enormous] wave crashed down.', 'adjective'],
+  ['The tortoise moved [slowly].', 'adverb'], ['She [carefully] opened the box.', 'adverb'], ['We will go swimming [tomorrow].', 'adverb'], ['He [often] forgets his bag.', 'adverb'], ['The rain fell [heavily].', 'adverb'],
+  ['The cat hid [under] the table.', 'preposition'], ['We walked [across] the field.', 'preposition'], ['The book is [on] the shelf.', 'preposition'], ['Wash your hands [before] lunch.', 'preposition'],
+  ['I was hungry [so] I made a sandwich.', 'conjunction'], ['We stayed inside [because] it was raining.', 'conjunction'], ['She smiled [although] she was sad.', 'conjunction'], ['You can have juice [or] milk.', 'conjunction'],
+  ['[She] gave the book to Sam.', 'pronoun'], ['The teacher thanked [them].', 'pronoun'], ['Is this pen [yours]?', 'pronoun'], ['Dad said [we] could stay up late.', 'pronoun']
+];
+/* sentence with ^ marks → tokens + comma positions */
+function caretSent(s) {
+  const raw = s.split(' '), toks = [], ans = [];
+  raw.forEach((t, i) => { if (t.endsWith('^')) { toks.push(t.slice(0, -1)); ans.push(i); } else toks.push(t); });
+  return { toks, ans, text: s.replace(/\^/g, ',') };
+}
+function gapQ(list, tip, prompt) {
+  const { toks, ans, text } = caretSent(pick(list));
+  return { kind: 'gaps', prompt, toks, gaps: ans, answer: ans.join(','), shown: text, long: true, explain: tip, html: '' };
+}
+function gapChoiceQ(list, tip) {
+  const { toks, ans, text } = caretSent(pick(list));
+  const join = set => toks.map((t, i) => t + (set.includes(i) ? ',' : '')).join(' ');
+  const wrong = new Set();
+  if (ans.length > 1) wrong.add(join(ans.slice(0, -1)));
+  wrong.add(join([]));
+  const spare = toks.map((_, i) => i).filter(i => i < toks.length - 1 && !ans.includes(i) && !/,$/.test(toks[i]));
+  if (spare.length) wrong.add(join(ans.concat(pick(spare)).sort((a, b) => a - b)));
+  wrong.delete(text);
+  return { kind: 'choice', exact: true, small: true, long: true, prompt: 'Which sentence has the commas right?', html: '', answer: text, options: shuffle([text, ...shuffle([...wrong]).slice(0, 2)]), explain: tip };
+}
+function speechQ() {
+  const [sp, p, who, pos] = pick(P_SPEECH), O = '“', C = '”', lc = sp.charAt(0).toLowerCase() + sp.slice(1);
+  let right, wrongs, tip;
+  if (pos === 'after') {
+    const inner = p === '.' ? ',' : p;
+    right = `${O}${sp}${inner}${C} ${who}.`;
+    wrongs = [`${O}${sp}${C}${inner} ${who}.`, `${O}${sp}${C} ${who}.`, `${O}${sp}${inner} ${who}.${C}`, `${O}${lc}${inner}${C} ${who}.`];
+    tip = `The spoken words go inside the inverted commas, and so does their punctuation${p === '.' ? '. A full stop becomes a comma because the sentence carries on' : ''}.`;
+  } else {
+    const W = cap(who);
+    right = `${W}, ${O}${sp}${p}${C}`;
+    wrongs = [`${W} ${O}${sp}${p}${C}`, `${W}, ${sp}${p}`, `${W}, ${O}${lc}${p}${C}`, `${W}, ${O}${sp}${C}${p}`];
+    tip = 'Put a comma after the speaker, then open the inverted commas. The speech starts with a capital letter, and its punctuation goes inside.';
+  }
+  return { kind: 'choice', exact: true, small: true, long: true, prompt: 'Which is punctuated correctly?', html: '', answer: right, options: shuffle([right, ...shuffle(wrongs).slice(0, 2)]), explain: tip };
+}
+function aposQ() {
+  const [s, ans, wrong, tip] = pick(P_APOS);
+  const html = `<div class="sentence">${esc(s).replace('___', '<span class="gap">?</span>')}</div>`;
+  return { kind: 'choice', exact: true, prompt: 'Which word fits?', html, answer: ans, options: shuffle([ans, ...wrong]), explain: `${s.replace('___', '<b>' + esc(ans) + '</b>')}<br>${tip}` };
+}
+function wcQ(level) {
+  const core = ['noun', 'verb', 'adjective'], all = Object.keys(WC_TIP);
+  const allowed = level === 0 ? core : level === 1 ? core.concat('adverb') : all;
+  const [s, cls] = pick(P_WC.filter(x => allowed.includes(x[1])));
+  const word = s.match(/\[(.+?)\]/)[1];
+  const opts = new Set([cls]); shuffle(level < 2 ? allowed : core.concat('adverb')).forEach(o => { if (opts.size < Math.min(4, allowed.length)) opts.add(o); });
+  const html = `<div class="sentence">${esc(s).replace(/\[(.+?)\]/, '<span class="hlw">$1</span>')}</div>`;
+  return { kind: 'choice', prompt: `What kind of word is <b>${esc(word)}</b>?`, html, answer: cls, options: shuffle([...opts]), explain: `<b>${esc(word)}</b> is a ${cls}.<br>${WC_TIP[cls]}` };
+}
+const T_LIST = 'Put a comma between the items in a list. Before the last item, use <b>and</b> instead of a comma.';
+const T_FRONT = 'When a sentence starts with a fronted adverbial (saying when, where or how), put a comma straight after it.';
+const T_EXTRA = 'Extra information in the middle of a sentence goes between <b>two</b> commas. Read the sentence without it: it should still make sense.';
+PACKS.push(
+  { id: 'clist', group: 'Punctuation', name: 'Commas in lists', emoji: '🦚', eg: 'eggs, flour, sugar and butter', gen: lv => rnd(10) < 3 - lv ? gapChoiceQ(P_LIST, T_LIST) : gapQ(P_LIST, T_LIST, 'Tap where the commas go'),
+    intro: `<p>${T_LIST}</p><p>We need eggs<b>,</b> flour<b>,</b> sugar and butter.</p><p>In this game, tap the gap after a word to put a comma there. Tap again to take it away.</p>` },
+  { id: 'cfront', group: 'Punctuation', name: 'Commas after openers', emoji: '🐿️', eg: 'After lunch, we played football.', gen: lv => rnd(10) < 3 - lv ? gapChoiceQ(P_FRONT, T_FRONT) : gapQ(P_FRONT, T_FRONT, 'Tap where the comma goes'),
+    intro: `<p>${T_FRONT}</p><p>Slowly<b>,</b> the tortoise crossed the road.<br>When the bell rang<b>,</b> everyone rushed outside.</p>` },
+  { id: 'cextra', group: 'Punctuation', name: 'Commas for extra information', emoji: '🦔', eg: 'My sister, who loves horses, rides.', gen: lv => rnd(10) < 3 - lv ? gapChoiceQ(P_EXTRA, T_EXTRA) : gapQ(P_EXTRA, T_EXTRA, 'Tap where the commas go'),
+    intro: `<p>${T_EXTRA}</p><p>My sister<b>,</b> who loves horses<b>,</b> rides every Saturday.<br>Mr Patel<b>,</b> our head teacher<b>,</b> gave a speech.</p>` },
+  { id: 'speech', group: 'Punctuation', name: 'Inverted commas', emoji: '🦜', eg: '“Watch out!” cried Grace.', gen: () => speechQ(),
+    intro: '<p>Inverted commas (speech marks) go around the words someone actually says.</p><p><b>Speech first:</b> “It’s time for bed<b>,</b>” said Dad.<br>The full stop becomes a comma inside the inverted commas. A <b>?</b> or <b>!</b> stays as it is: “Where are my shoes<b>?</b>” asked Leo.</p><p><b>Speaker first:</b> Priya said<b>,</b> “<b>L</b>et’s build a den.”<br>Comma after the speaker, and the speech starts with a capital letter.</p>' },
+  { id: 'apos', group: 'Punctuation', name: 'Apostrophes', emoji: '🦀', eg: "the dog's tail · the girls' bikes · can't", gen: () => aposQ(),
+    intro: "<p><b>Missing letters:</b> the apostrophe goes where the letters were. can not → can<b>'</b>t, we are → we<b>'</b>re</p><p><b>Belonging to one:</b> add <b>'s</b>. the dog<b>'s</b> tail</p><p><b>Belonging to more than one, ending in s:</b> add <b>'</b> after the s. the girls<b>'</b> bikes</p><p><b>Plurals not ending in s:</b> add <b>'s</b>. the children<b>'s</b> coats</p><p><b>Just more than one</b> (nothing belongs to them): no apostrophe. three horses</p>" },
+  { id: 'wclass', group: 'Grammar', name: 'Word classes', emoji: '🐙', eg: 'noun · verb · adjective · adverb', gen: lv => wcQ(lv),
+    intro: '<p>Every word in a sentence has a job.</p>' + Object.values(WC_TIP).map(t => `<p>${t}</p>`).join('') + '<p>It starts with nouns, verbs and adjectives, then adds adverbs, and then the rest as the days go on.</p>' }
+);
 const PK = id => PACKS.find(p => p.id === id);
 const RP = id => { S.rules = S.rules || {}; return S.rules[id] || (S.rules[id] = { days: [], mastered: false, lastCredit: '', lastSeen: '', best: 0 }); };
 const TRAIN_N = 8, TRAIN_PASS = 7, CHECK_N = 5, CHECK_PASS = 4, CHECK_GAP = 3;
@@ -612,7 +739,7 @@ function labView() {
     const status = due ? '<b style="color:var(--bad)">👻 Check-up due</b>' : r.mastered ? '<b style="color:var(--ok)">Tamed</b>' : doneToday ? 'Done for today ✔' : r.days.length ? `Day ${r.days.length} of 3` : 'New';
     return `<button class="pack" data-pack="${p.id}"><span class="pe">${p.emoji}</span><span class="pt"><b>${p.name}</b><span class="mute">${esc(p.eg)}</span><span class="ps"><span class="pips">${rulePips(p.id)}</span> ${status}</span></span></button>`;
   };
-  shell(`<h1>🧪 Spelling Lab</h1><p class="sub">Each rule is a gremlin. Score ${TRAIN_PASS} out of ${TRAIN_N} on 3 different days to tame it. Tamed rules come back for check-ups.</p>
+  shell(`<h1>🧪 Lab</h1><p class="sub">Spelling, punctuation and grammar. Each rule is a gremlin. Score ${TRAIN_PASS} out of ${TRAIN_N} on 3 different days to tame it. Tamed rules come back for check-ups.</p>
    <div class="row"><span class="chip">🔥 ${S.streak.count} day${S.streak.count === 1 ? '' : 's'}</span><span class="chip">⭐ ${S.stars}</span><span class="chip">🧪 ${tamed}/${PACKS.length} rules</span></div>
    ${groups.map(g => `<h3>${g}</h3>${PACKS.filter(p => p.group === g).map(card).join('')}`).join('')}`, 'lab');
   app.querySelectorAll('[data-pack]').forEach(b => b.onclick = () => packIntro(b.dataset.pack));
@@ -640,17 +767,28 @@ function startLab(id, mode) {
 function labQ() {
   const p = PK(lab.id), q = lab.qs[lab.i];
   const meta = `${p.name}<br>${lab.mode === 'check' ? '👻 Check-up · ' : lab.mode === 'practice' ? 'Practice · ' : ''}${lab.i + 1} of ${lab.qs.length}`;
-  const body = q.kind === 'choice'
+  const body = q.kind === 'gaps'
+    ? `<div class="gapsent">${q.toks.map((t, i) => `<span class="gw">${esc(t)}</span>${i < q.toks.length - 1 ? `<button class="gb" data-g="${i}" aria-label="Comma after ${esc(t)}"></button>` : ''}`).join('')}</div><button class="btn primary" id="check">Check</button>`
+    : q.kind === 'choice'
     ? `${q.html}<div class="opts${q.small ? ' small' : ''}">${q.options.map(o => `<button class="opt" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`
     : `${q.html}${q.say && canSpeak() ? `<div class="row" style="justify-content:center"><button class="btn small" id="hear">🔊 Hear it</button><button class="btn small ghost" id="slow">🐢 Slowly</button></div>` : ''}<input id="ans" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="${q.placeholder || 'Type the word'}"><button class="btn primary" id="check">Check</button>`;
   app.innerHTML = `<main class="q"><div class="top"><button class="x" id="quit" aria-label="Quit">✕</button><div class="meta">${meta}</div><div class="chip">⭐ ${S.stars}</div></div>
    <div class="gr">${p.emoji}</div><h2 class="prompt">${q.prompt}</h2><div id="body">${body}</div><div id="fb"></div></main>`;
   window.scrollTo(0, 0);
   $('#quit').onclick = () => { try { speechSynthesis.cancel(); } catch (e) { } lab = null; view = 'lab'; render(); };
-  if (q.kind === 'choice') {
+  const eq = (a, b) => q.exact ? a === b : norm(a) === norm(b);
+  if (q.kind === 'gaps') {
+    const on = new Set();
+    document.querySelectorAll('.gb').forEach(b => b.onclick = () => { const g = +b.dataset.g; on.has(g) ? on.delete(g) : on.add(g); b.classList.toggle('on', on.has(g)); b.textContent = on.has(g) ? ',' : ''; });
+    $('#check').onclick = () => {
+      const want = new Set(q.gaps);
+      document.querySelectorAll('.gb').forEach(b => { const g = +b.dataset.g; if (want.has(g) && on.has(g)) b.classList.add('gok'); else if (want.has(g)) { b.classList.add('gmiss'); b.textContent = ','; } else if (on.has(g)) b.classList.add('gext'); });
+      labAnswered(q, on.size === want.size && [...on].every(g => want.has(g)), null);
+    };
+  } else if (q.kind === 'choice') {
     document.querySelectorAll('.opt').forEach(b => b.onclick = () => {
-      const ok = norm(b.dataset.v) === norm(q.answer);
-      document.querySelectorAll('.opt').forEach(x => { if (norm(x.dataset.v) === norm(q.answer)) x.classList.add('right'); });
+      const ok = eq(b.dataset.v, q.answer);
+      document.querySelectorAll('.opt').forEach(x => { if (eq(x.dataset.v, q.answer)) x.classList.add('right'); });
       if (!ok) b.classList.add('wrong');
       labAnswered(q, ok, null);
     });
@@ -672,7 +810,7 @@ function labAnswered(q, ok, typed) {
   } else {
     const d = typed ? diffHTML(norm(right), typed) : null;
     const isWord = q.kind === 'type' || !/\s/.test(right);
-    fb.innerHTML = `<div class="fb bad"><div class="big">Not quite</div><div class="word">${d ? d.a : esc(right)}</div>${d ? `<div class="you">You wrote: ${d.b}</div>` : ''}<div class="note rulenote">${q.explain}</div>
+    fb.innerHTML = `<div class="fb bad"><div class="big">Not quite</div><div class="${q.long ? 'sentence' : 'word'}">${d ? d.a : esc(right)}</div>${d ? `<div class="you">You wrote: ${d.b}</div>` : ''}<div class="note rulenote">${q.explain}</div>
      ${isWord && q.kind === 'type' ? `<label for="fix">Now type it correctly:</label><input id="fix" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">` : ''}<button class="btn primary" id="next" ${isWord && q.kind === 'type' ? 'disabled' : ''}>${lab.i + 1 < lab.qs.length ? 'Next →' : 'Finish'}</button></div>`;
     const fix = $('#fix'), nx = $('#next');
     nx.onclick = next;
@@ -701,7 +839,7 @@ function labEnd() {
   app.innerHTML = `<main class="center"><div class="gr">${icon}</div><h1>${head}</h1><p class="mute">${msg}</p>
    <div class="card"><div class="stat">${L.score} / ${L.qs.length}</div><div class="mute">+${L.stars} ⭐ · 🔥 ${S.streak.count}-day streak</div></div>
    ${missed.length ? `<div class="card"><b>Ones to look at again</b><div class="reveal">${missed.map(m => `<span class="chip">${esc(m)}</span>`).join('')}</div></div>` : ''}
-   <button class="btn primary" id="again">${L.mode === 'train' && L.score < TRAIN_PASS ? 'Try again' : 'Back to the rule'}</button><button class="btn" id="hm">Spelling Lab</button></main>`;
+   <button class="btn primary" id="again">${L.mode === 'train' && L.score < TRAIN_PASS ? 'Try again' : 'Back to the rule'}</button><button class="btn" id="hm">Back to the Lab</button></main>`;
   if (fx) confetti([p.emoji, '⭐', '🎉']);
   $('#again').onclick = () => L.mode === 'train' && L.score < TRAIN_PASS ? startLab(p.id, 'train') : packIntro(p.id);
   $('#hm').onclick = () => { view = 'lab'; render(); };
